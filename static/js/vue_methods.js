@@ -3177,10 +3177,7 @@ formatMessage(content, index) {
                         await new Promise(r => setTimeout(r, delay));
                     }
 
-                    const fetchTimeoutMs = 900000;
                     const abortSignal = this.abortController.signal;
-                    const timeoutSignal = AbortSignal.timeout(fetchTimeoutMs);
-                    const combinedSignal = AbortSignal.any([abortSignal, timeoutSignal]);
 
                     response = await fetch(`/v1/chat/completions`, {
                         method: 'POST',
@@ -3196,7 +3193,7 @@ formatMessage(content, index) {
                             group_id: this.stringifyEntityId(this.activeConversationGroupId || this.draftConversationGroupId || 'default'),
                             user_message_id: this.stringifyEntityId(latestUserMessage?.id || null),
                         }),
-                        signal: combinedSignal
+                        signal: abortSignal
                     });
 
                     if (response.ok) break;
@@ -3240,26 +3237,36 @@ formatMessage(content, index) {
             this._typewriterSpeed = 30;
             this._startTypewriterTick();
             this.first_token = true;
-            const readTimeoutMs = 600000;
+            const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+            let lastDataTime = Date.now();
             let streamFinished = false;
             while (true) {
                 if (this.abortController?.signal.aborted) break;
+
+                const remainingIdle = IDLE_TIMEOUT_MS - (Date.now() - lastDataTime);
+                if (remainingIdle <= 0) {
+                    console.error('Stream idle timeout (30min), aborting');
+                    this.abortController?.abort();
+                    throw new DOMException('Response stream idle timeout', 'TimeoutError');
+                }
+
                 let readResult;
                 try {
                     readResult = await Promise.race([
                         reader.read(),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('Read timeout')), readTimeoutMs))
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Read timeout')), remainingIdle))
                     ]);
                 } catch (readErr) {
                     if (readErr.message === 'Read timeout') {
-                        console.error('Stream read timeout, aborting');
+                        console.error('Stream idle timeout (30min), aborting');
                         this.abortController?.abort();
-                        throw new DOMException('Response stream timed out', 'TimeoutError');
+                        throw new DOMException('Response stream idle timeout', 'TimeoutError');
                     }
                     throw readErr;
                 }
                 const { done, value } = readResult;
                 if (done) break;
+                lastDataTime = Date.now();
                 buffer += decoder.decode(value, { stream: true });
 
                 while (buffer.includes('\n\n')) {
