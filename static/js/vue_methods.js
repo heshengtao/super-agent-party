@@ -3712,33 +3712,6 @@ formatMessage(content, index) {
                 });
             }
 
-            // 冻结当前已完成消息的非最新 backend_content 条目，减少响应式代理开销
-            if (currentMsg && Array.isArray(currentMsg.backend_content) && currentMsg.backend_content.length > 1) {
-                const lastIdx = currentMsg.backend_content.length - 1;
-                for (let i = 0; i < lastIdx; i++) {
-                    const entry = currentMsg.backend_content[i];
-                    if (entry && !Object.isFrozen(entry) && entry.role !== 'approval') {
-                        Object.freeze(entry);
-                        if (Array.isArray(entry.tool_calls)) Object.freeze(entry.tool_calls);
-                        if (typeof entry.content === 'string') Object.freeze(entry.content);
-                    }
-                }
-            }
-
-            // 冻结所有非当前已完成消息的整个 backend_content，消除整个历史记录的响应式开销
-            for (let i = 0; i < this.messages.length - 1; i++) {
-                const msg = this.messages[i];
-                if (msg && msg.generationFinished !== false && Array.isArray(msg.backend_content)) {
-                    msg.backend_content.forEach(entry => {
-                        if (entry && !Object.isFrozen(entry) && entry.role !== 'approval') {
-                            Object.freeze(entry);
-                            if (Array.isArray(entry.tool_calls)) Object.freeze(entry.tool_calls);
-                            if (typeof entry.content === 'string') Object.freeze(entry.content);
-                        }
-                    });
-                }
-            }
-
             if (this.ttsSettings.enabled && audioProcess) {
                 await audioProcess;
             } else {
