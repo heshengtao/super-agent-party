@@ -2373,6 +2373,21 @@ formatMessage(content, index) {
       };
     },
 
+    disconnectWebSocket() {
+      if (this.ws) {
+        try {
+          this.ws.onopen = null;
+          this.ws.onmessage = null;
+          this.ws.onclose = null;
+          this.ws.onerror = null;
+          this.ws.close();
+        } catch (e) {
+          console.error('Error closing WebSocket:', e);
+        }
+        this.ws = null;
+      }
+    },
+
    async updateGlobalShortcut() {
       if (this.asrSettings.interactionMethod === 'globalKeyTriggered' || this.asrSettings.interactionMethod === 'keyTriggered'){
         this.stopASR();
@@ -2488,13 +2503,25 @@ formatMessage(content, index) {
     },  
     // 新增：发送当前消息列表到所有连接的客户端
     sendMessagesToExtension() {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        try {
-          const MAX_WS_MESSAGES = 50;
-          const recentMessages = this.messages.length > MAX_WS_MESSAGES
-            ? this.messages.slice(-MAX_WS_MESSAGES)
-            : this.messages;
-          this.ws.send(JSON.stringify({
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+      if (this.isSending && this._lastExtSendTime && Date.now() - this._lastExtSendTime < 3000) {
+        if (!this._extSendPending) {
+          this._extSendPending = true;
+          this._extSendTimer = setTimeout(() => {
+            this._extSendPending = false;
+            this._extSendTimer = null;
+            this.sendMessagesToExtension();
+          }, 3000);
+        }
+        return;
+      }
+      this._lastExtSendTime = Date.now();
+      try {
+        const MAX_WS_MESSAGES = 50;
+        const recentMessages = this.messages.length > MAX_WS_MESSAGES
+          ? this.messages.slice(-MAX_WS_MESSAGES)
+          : this.messages;
+        this.ws.send(JSON.stringify({
             type: 'broadcast_messages',
             data: {
               messages: recentMessages,
@@ -2504,7 +2531,6 @@ formatMessage(content, index) {
         } catch (e) {
           console.error('Failed to send messages to extension:', e);
         }
-      }
     },
     async syncSystemPromptToMessages(newPrompt) {
       // 情况 1: 新提示词为空
@@ -3561,6 +3587,7 @@ formatMessage(content, index) {
 
             // 循环结束后，停止打字机动画并强制刷新剩余文字
             this._typewriterRunning = false;
+            this._typewriterTickCount = 0;
             if (this._typewriterRafId) cancelAnimationFrame(this._typewriterRafId);
             this.flushStreamTextBuffer();
 
@@ -3634,6 +3661,10 @@ formatMessage(content, index) {
                     system_prompt: this.system_prompt,
                 };
                 this.conversations.unshift(newConv);
+                const MAX_CONVERSATIONS = 50;
+                if (this.conversations.length > MAX_CONVERSATIONS) {
+                    this.conversations = this.conversations.slice(0, MAX_CONVERSATIONS);
+                }
             } else {
                 // 🔴 核心修复：添加安全链判断，防止潜在的读取错误
                 const conv = this.conversations.find(conv => conv.id === this.conversationId);
@@ -3672,7 +3703,6 @@ formatMessage(content, index) {
             if (currentMsg && Array.isArray(currentMsg.displayBlocks)) {
                 currentMsg.displayBlocks.forEach(block => {
                     if (!Object.isFrozen(block)) {
-                        // 🔴 核心修复：跳过 approval 类型和带有 data 对象的块
                         if (block.type !== 'approval' && !block.data) {
                             Object.freeze(block);
                             if (typeof block.content === 'string') Object.freeze(block.content);
@@ -3680,6 +3710,33 @@ formatMessage(content, index) {
                         }
                     }
                 });
+            }
+
+            // 冻结当前已完成消息的非最新 backend_content 条目，减少响应式代理开销
+            if (currentMsg && Array.isArray(currentMsg.backend_content) && currentMsg.backend_content.length > 1) {
+                const lastIdx = currentMsg.backend_content.length - 1;
+                for (let i = 0; i < lastIdx; i++) {
+                    const entry = currentMsg.backend_content[i];
+                    if (entry && !Object.isFrozen(entry) && entry.role !== 'approval') {
+                        Object.freeze(entry);
+                        if (Array.isArray(entry.tool_calls)) Object.freeze(entry.tool_calls);
+                        if (typeof entry.content === 'string') Object.freeze(entry.content);
+                    }
+                }
+            }
+
+            // 冻结所有非当前已完成消息的整个 backend_content，消除整个历史记录的响应式开销
+            for (let i = 0; i < this.messages.length - 1; i++) {
+                const msg = this.messages[i];
+                if (msg && msg.generationFinished !== false && Array.isArray(msg.backend_content)) {
+                    msg.backend_content.forEach(entry => {
+                        if (entry && !Object.isFrozen(entry) && entry.role !== 'approval') {
+                            Object.freeze(entry);
+                            if (Array.isArray(entry.tool_calls)) Object.freeze(entry.tool_calls);
+                            if (typeof entry.content === 'string') Object.freeze(entry.content);
+                        }
+                    });
+                }
             }
 
             if (this.ttsSettings.enabled && audioProcess) {
@@ -3712,6 +3769,7 @@ formatMessage(content, index) {
 
             // 清理流式缓冲区状态及打字机动画
             this._typewriterRunning = false;
+            this._typewriterTickCount = 0;
             if (this._typewriterRafId) { cancelAnimationFrame(this._typewriterRafId); this._typewriterRafId = null; }
             this._streamTargetMsg = null;
             this._streamTextBuffer = '';
@@ -4113,12 +4171,16 @@ formatMessage(content, index) {
                 } else if (!block.content.endsWith('\n... (Truncated)')) {
                     block.content += '\n... (Truncated)';
                 }
-                block.segments = this.splitMessageContent(block.content);
                 if (msg.pure_content.length < MAX_TEXT_CONTENT) {
                     msg.pure_content += chunk;
                 }
                 msg.content += chunk;
-                msg.segments = this.splitMessageContent(msg.content);
+
+                this._typewriterTickCount = (this._typewriterTickCount || 0) + 1;
+                if (this._typewriterTickCount % 8 === 0 || buffer.length === 0) {
+                    block.segments = this.splitMessageContent(block.content);
+                    msg.segments = this.splitMessageContent(msg.content);
+                }
             }
             this.requestScrollToBottom();
         }
@@ -4609,6 +4671,8 @@ formatMessage(content, index) {
     },
     stopGenerate() {
       this._typewriterRunning = false;
+      this._typewriterTickCount = 0;
+      if (this._extSendTimer) { clearTimeout(this._extSendTimer); this._extSendTimer = null; this._extSendPending = false; }
       if (this._typewriterRafId) { cancelAnimationFrame(this._typewriterRafId); this._typewriterRafId = null; }
       if (this.abortController) {
         this.abortController.abort();
@@ -10458,7 +10522,7 @@ processMarkdownStreamForTTS(message, deltaText, isFinal = false) {
         try {
             await Promise.race([
                 audioReady,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('sb_timeout')), 5000))
+                new Promise((_, reject) => setTimeout(() => reject(new Error('sb_timeout')), 30000))
             ]);
         } catch (e) {
             console.warn('MediaSource setup failed, falling back to blob:', e);
@@ -10482,7 +10546,7 @@ processMarkdownStreamForTTS(message, deltaText, isFinal = false) {
                     sourceBuffer.appendBuffer(first.value);
                     await new Promise((resolve) => {
                         sourceBuffer.addEventListener('updateend', () => resolve(), { once: true });
-                        setTimeout(() => resolve(), 5000);
+                        setTimeout(() => resolve(), 30000);
                     });
                 }
             }
