@@ -3177,7 +3177,7 @@ formatMessage(content, index) {
                         await new Promise(r => setTimeout(r, delay));
                     }
 
-                    const fetchTimeoutMs = 300000;
+                    const fetchTimeoutMs = 900000;
                     const abortSignal = this.abortController.signal;
                     const timeoutSignal = AbortSignal.timeout(fetchTimeoutMs);
                     const combinedSignal = AbortSignal.any([abortSignal, timeoutSignal]);
@@ -3240,7 +3240,7 @@ formatMessage(content, index) {
             this._typewriterSpeed = 30;
             this._startTypewriterTick();
             this.first_token = true;
-            const readTimeoutMs = 120000;
+            const readTimeoutMs = 600000;
             let streamFinished = false;
             while (true) {
                 if (this.abortController?.signal.aborted) break;
