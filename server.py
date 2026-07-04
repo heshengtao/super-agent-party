@@ -11621,11 +11621,13 @@ async def websocket_endpoint(websocket: WebSocket):
                             print(f"[content_safety] ws save_settings blocked words: {matched}")
                             await ws_manager.send_json({"type": "error", "message": "系统提示词包含敏感内容，设置未保存。"}, websocket)
                             break
-                await save_settings(settings_dict)
-                await sync_all_bots_behavior(settings_dict)
+                from py.get_setting import deep_update
+                deep_update(cur_settings, settings_dict)
+                await save_settings(cur_settings)
+                await sync_all_bots_behavior(cur_settings)
                 try:
                     from py.diary_engine import global_diary_engine
-                    global_diary_engine.update_config(settings_dict.get("diarySettings"))
+                    global_diary_engine.update_config(cur_settings.get("diarySettings"))
                 except Exception as e:
                     print(f"日记引擎配置同步异常: {e}")
 
@@ -11636,7 +11638,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 }, websocket)
                 
                 # 广播给其他客户端（不含自己）
-                await ws_manager.broadcast_settings_update(settings_dict, exclude=websocket)
+                await ws_manager.broadcast_settings_update(cur_settings, exclude=websocket)
 
             elif msg_type == "save_conversations":
                 cov_data = data.get("data", {})
