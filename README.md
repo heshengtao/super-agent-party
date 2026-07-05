@@ -7,8 +7,29 @@
   <a href="./README.md">
     <img src="https://img.shields.io/badge/English-Readme-0057D2?style=for-the-badge&logo=markdown"/>
   </a>
+  <a href="./README_FR.md">
+    <img src="https://img.shields.io/badge/Français-Readme-CE4A4A?style=for-the-badge&logo=markdown"/>
+  </a>
+  <a href="./README_DE.md">
+    <img src="https://img.shields.io/badge/Deutsch-Readme-FFD700?style=for-the-badge&logo=markdown"/>
+  </a>
+  <a href="./README_RU.md">
+    <img src="https://img.shields.io/badge/Русский-Readme-D52B1E?style=for-the-badge&logo=markdown"/>
+  </a>
+  <a href="./README_AR.md">
+    <img src="https://img.shields.io/badge/العربية-Readme-007A33?style=for-the-badge&logo=markdown"/>
+  </a>
+  <a href="./README_ES.md">
+    <img src="https://img.shields.io/badge/Español-Readme-C60B1E?style=for-the-badge&logo=markdown"/>
+  </a>
+  <a href="./README_PT.md">
+    <img src="https://img.shields.io/badge/Português-Readme-009E3A?style=for-the-badge&logo=markdown"/>
+  </a>
   <a href="./README_JA.md">
     <img src="https://img.shields.io/badge/日本語-Readme-FF69B4?style=for-the-badge&logo=markdown"/>
+  </a>
+  <a href="./README_KO.md">
+    <img src="https://img.shields.io/badge/한국어-Readme-003478?style=for-the-badge&logo=markdown"/>
   </a>
 </div>
 

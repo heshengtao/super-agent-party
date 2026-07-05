@@ -8,6 +8,7 @@ import logging
 import math
 import os
 import sys
+import threading
 import time
 import uuid
 import numpy as np
@@ -297,6 +298,7 @@ class THAEngine:
         self.session: Optional[ort.InferenceSession] = None
         self._loaded = False
         self.model_path = model_path
+        self._lock = threading.Lock()
 
         # 🌟 优化：预分配不变量，避免循环重复分配内存带来的 GC 压力
         self.green_bg = np.array([0.0, 255.0, 0.0], dtype=np.float32).reshape(3, 1, 1)
@@ -373,8 +375,9 @@ class THAEngine:
             self.load()
 
         p = pose.reshape(1, 45).astype(np.float32)
-        out = self.session.run(None, {"pose": p})[0]
-        img_data = out[0]  # (C, 512, 512)  CHW
+        with self._lock:
+            out = self.session.run(None, {"pose": p})[0]
+            img_data = out[0].copy()  # (C, 512, 512) GHW; copy 避免并发 run() 覆盖 buffer
 
         C = img_data.shape[0]
         _clip = np.clip  # 本地引用，减少属性查找
@@ -441,6 +444,7 @@ class CoreMLTHAEngine:
         self._loaded = False
         self.model_path = model_path
         self._out_key = None
+        self._lock = threading.Lock()
         self.green_bg = np.array([0.0, 255.0, 0.0], dtype=np.float32).reshape(3, 1, 1)
 
     def load(self):
@@ -470,7 +474,8 @@ class CoreMLTHAEngine:
             self.load()
 
         p = pose.reshape(1, 45).astype(np.float32)
-        result = self.model.predict({"pose": p})
+        with self._lock:
+            result = self.model.predict({"pose": p})
 
         if self._out_key:
             blended = result[self._out_key]

@@ -6973,6 +6973,26 @@ function updateElement(el, rawMarkdown, formatFn) {
                           <i class="fa-solid fa-plus"></i>
                         </el-button>
                       </div>
+                      <div v-if="mainSuggestedParams.length > 0" class="suggested-params">
+                        <div class="suggested-header">
+                          <i class="fa-solid fa-lightbulb"></i>
+                          <span>{{ t('suggestedParams') }}</span>
+                          <el-tag size="small" effect="plain" round>{{ formatVendorName(mainVendorName) }}</el-tag>
+                        </div>
+                        <div class="suggested-list">
+                          <el-tooltip
+                            v-for="param in mainSuggestedParams"
+                            :key="param.name"
+                            :content="t(param.desc)"
+                            placement="top"
+                          >
+                            <div class="suggested-card" @click="addMainSuggestedParam(param)">
+                              <span class="suggested-name"><i class="fa-solid fa-plus"></i> {{ param.name }}</span>
+                              <span class="suggested-type">{{ param.type }}</span>
+                            </div>
+                          </el-tooltip>
+                        </div>
+                      </div>
                       <div class="extra-params">
                         <div
                           v-for="(param, index) in settings.extra_params"
@@ -7282,6 +7302,26 @@ function updateElement(el, rawMarkdown, formatFn) {
                         >
                           <i class="fa-solid fa-plus"></i>
                         </el-button>
+                      </div>
+                      <div v-if="fastSuggestedParams.length > 0" class="suggested-params">
+                        <div class="suggested-header">
+                          <i class="fa-solid fa-lightbulb"></i>
+                          <span>{{ t('suggestedParams') }}</span>
+                          <el-tag size="small" effect="plain" round>{{ formatVendorName(fastVendorName) }}</el-tag>
+                        </div>
+                        <div class="suggested-list">
+                          <el-tooltip
+                            v-for="param in fastSuggestedParams"
+                            :key="param.name"
+                            :content="t(param.desc)"
+                            placement="top"
+                          >
+                            <div class="suggested-card" @click="addFastSuggestedParam(param)">
+                              <span class="suggested-name"><i class="fa-solid fa-plus"></i> {{ param.name }}</span>
+                              <span class="suggested-type">{{ param.type }}</span>
+                            </div>
+                          </el-tooltip>
+                        </div>
                       </div>
                       <div class="extra-params">
                         <div
@@ -15737,7 +15777,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                           >
                             {{ t('vrmAPIInstructions') }}
                           </el-alert>
-                          <el-form-item :label="t('apiEndpoint')" class="form-item-align" label-position="top">
+                          <el-form-item :label="t('vrmApiEndpoint')" class="form-item-align" label-position="top">
                             <el-input
                               :value="partyURL+'/vrm.html'"
                               readonly
@@ -15753,7 +15793,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                               </template>
                             </el-input>
                           </el-form-item>
-                          <el-form-item :label="t('360apiEndpoint')" class="form-item-align" label-position="top">
+                          <el-form-item :label="t('vrm360ApiEndpoint')" class="form-item-align" label-position="top">
                             <el-input
                               :value="partyURL+'/vrm.html?mode=render'"
                               readonly
@@ -15762,6 +15802,22 @@ function updateElement(el, rawMarkdown, formatFn) {
                               <template #append>
                                 <el-button
                                   @click="copyVrmEndpoint"
+                                  class="copy-btn"
+                                >
+                                <i class="fa-solid fa-copy"></i>
+                                </el-button>
+                              </template>
+                            </el-input>
+                          </el-form-item>
+                          <el-form-item :label="t('thaApiEndpoint')" class="form-item-align" label-position="top">
+                            <el-input
+                              :value="partyURL+'/tha.html'"
+                              readonly
+                              class="full-width-input"
+                            >
+                              <template #append>
+                                <el-button
+                                  @click="copyTHAEndpoint"
                                   class="copy-btn"
                                 >
                                 <i class="fa-solid fa-copy"></i>
@@ -16173,6 +16229,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                         </div>
                       </div>
                     </el-form>
+
                   </div>
                   <!-- THA模型上传对话框 -->
                   <el-dialog append-to-body
@@ -16666,7 +16723,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                               </el-alert>
 
                               <!-- API端点 -->
-                              <el-form-item :label="t('apiEndpoint')" class="form-item-align" label-position="top">
+                              <el-form-item :label="t('vrmApiEndpoint')" class="form-item-align" label-position="top">
                                 <el-input
                                   :value="partyURL+'/vrm.html'"
                                   readonly
@@ -16683,7 +16740,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                                 </el-input>
                               </el-form-item>
                               <!-- API端点 -->
-                              <el-form-item :label="t('360apiEndpoint')" class="form-item-align" label-position="top">
+                              <el-form-item :label="t('vrm360ApiEndpoint')" class="form-item-align" label-position="top">
                                 <el-input
                                   :value="partyURL+'/vrm.html?mode=render'"
                                   readonly
@@ -16692,6 +16749,22 @@ function updateElement(el, rawMarkdown, formatFn) {
                                   <template #append>
                                     <el-button
                                       @click="copyVrmEndpoint"
+                                      class="copy-btn"
+                                    >
+                                    <i class="fa-solid fa-copy"></i>
+                                    </el-button>
+                                  </template>
+                                </el-input>
+                              </el-form-item>
+                              <el-form-item :label="t('thaApiEndpoint')" class="form-item-align" label-position="top">
+                                <el-input
+                                  :value="partyURL+'/tha.html'"
+                                  readonly
+                                  class="full-width-input"
+                                >
+                                  <template #append>
+                                    <el-button
+                                      @click="copyTHAEndpoint"
                                       class="copy-btn"
                                     >
                                     <i class="fa-solid fa-copy"></i>
@@ -18579,6 +18652,7 @@ function updateElement(el, rawMarkdown, formatFn) {
   <script src="libs/vue.global.prod.js"></script>
   <script src="libs/element-plus.js"></script>
   <script src="libs/element-plus-icons.js"></script>
+  <script src="js/vendor_params.js"></script>
   <script src="js/vue_data.js"></script>
   <script src="js/vue_methods.js"></script>
   <script src="js/renderer.js"></script>

@@ -1256,15 +1256,15 @@ const app = Vue.createApp({
         // 且加载在 styles.css 之后，先前的主题色将因此被覆盖（特异度相同则后载入优先）
         // 所以 JS 必须以 inline style 设置主色和补全变体，色值与 CSS [data-theme] 块一致
         const cssPrimary = {
-          light: '#2a7a8c',
-          dark: '#d97706',
-          midnight: '#ee7e00',
-          desert: '#d98236',
-          neon: '#ff2d95',
-          marshmallow: '#f5a5c3',
-          ink: '#2c3e50',
-          party: '#ed7d00',
-          rainbow: '#845ec2',
+          light: '#17827a',
+          dark: '#c8815a',
+          midnight: '#4d94f0',
+          desert: '#c4784a',
+          neon: '#e04090',
+          marshmallow: '#e29aaa',
+          ink: '#2a3b4c',
+          party: '#e08a20',
+          rainbow: '#7a5cc0',
         }[newVal];
 
         if (cssPrimary) {
@@ -1343,6 +1343,31 @@ const app = Vue.createApp({
         vendor,
         providers
       }));
+    },
+
+    // 当前主模型的供应商名称
+    mainVendorName() {
+      if (!this.settings.selectedProvider) return null;
+      const provider = this.modelProviders.find(p => p.id === this.settings.selectedProvider);
+      return provider ? provider.vendor : null;
+    },
+    // 当前快速应答模型的供应商名称
+    fastVendorName() {
+      if (!this.fastSettings.selectedProvider) return null;
+      const provider = this.modelProviders.find(p => p.id === this.fastSettings.selectedProvider);
+      return provider ? provider.vendor : null;
+    },
+    // 主模型推荐参数
+    mainSuggestedParams() {
+      const vendor = this.mainVendorName;
+      if (!vendor || !this.vendorSuggestedParams[vendor]) return [];
+      return this.vendorSuggestedParams[vendor].filter(p => !this.paramExistsInMain(p.name));
+    },
+    // 快速应答模型推荐参数
+    fastSuggestedParams() {
+      const vendor = this.fastVendorName;
+      if (!vendor || !this.vendorSuggestedParams[vendor]) return [];
+      return this.vendorSuggestedParams[vendor].filter(p => !this.paramExistsInFast(p.name));
     },
 
     // ✨ 新增：主页面扩展列表过滤逻辑 ✨

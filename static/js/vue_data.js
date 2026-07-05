@@ -1872,6 +1872,8 @@ let vue_data = {
       'LocalAI', 'ttswebui', 'Dify', 'newapi'
     ],
 
+    // 供应商推荐参数（从 vendor_params.js 加载，供 UI 建议使用）
+    vendorSuggestedParams: window.vendorSuggestedParams || {},
     vendorValues: [
       'custom','customAnthropic', 'OpenAI','Anthropic', 'Gemini','Grok',
       'llama.cpp', 'Ollama','Vllm','LMstudio','SGLang','xinference','Dify','newapi',

@@ -538,6 +538,17 @@ def _cleanup_model_paths_sync(user_settings, has_changes):
                 else:
                     tha_config["selectedModelId"] = ""
 
+def deep_update(target: dict, source: dict):
+    """递归合并 source 到 target，source 中的值优先。用于防止 autoSaveSettings 覆盖数据库中的完整配置。"""
+    for key, value in source.items():
+        if key not in target:
+            target[key] = value
+        elif isinstance(value, dict) and isinstance(target.get(key), dict):
+            deep_update(target[key], value)
+        else:
+            target[key] = value
+
+
 async def load_settings():
     await init_db()
     defaults = get_default_settings_sync().copy()
@@ -572,7 +583,7 @@ async def load_settings():
                 await asyncio.to_thread(_migrate_old_tha_models)
                 
                 if has_changes[0]:
-                    asyncio.create_task(save_settings(user_settings))
+                    await save_settings(user_settings)
                 return user_settings
             else:
                 # 尝试从旧 settings.json 迁移（兼容旧版本数据）

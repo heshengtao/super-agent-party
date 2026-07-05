@@ -9,427 +9,415 @@
 }
 
 /* =========================================
-   亮色主题：极简云石白 (Alabaster & Silk) - 高级现代、克制护眼
+   亮色主题：Alabaster Studio - 暖灰基底 + 沉稳青碧 (iOS + Notion 融合)
    ========================================= */
 [data-theme="light"] {
-  /* 基础颜色 - 依然是“白”主题，但去除了最高值的刺眼反光，呈现高级哑光纸质感 */
-  --bg-color: #fdfdfc; /* 卡片底色：99%的暖白，保证界面的干净清透 */
-  --text-color: #2c2c2a; /* 字体：深炭黑（带极弱的暖调），对比度清晰但不刺眼 */
-  --border-color: #e6e5e0;
+  /* 基础颜色 - 暖调纸质感 */
+  --bg-color: #fcfcfa;
+  --text-color: #1c1c1a;
+  --border-color: #e4e3de;
   
-  /* Element Plus 核心变量 - 沉静的高级青石蓝 */
-  --el-color-primary: #2a7a8c; 
-  --el-color-primary-light-3: #599ca9;
-  --el-color-primary-light-5: #8bbdc7;
-  --el-color-primary-light-7: #bcdbe1;
-  --el-color-primary-light-9: #e6f0f2;
-  --el-color-primary-rgb: 42, 122, 140 !important;
+  /* 主色调：沉稳青碧 (介于 iOS Teal 与 Linear Navy 之间) */
+  --el-color-primary: #17827a; 
+  --el-color-primary-light-3: #3e9f98;
+  --el-color-primary-light-5: #6fbbb5;
+  --el-color-primary-light-7: #a3d7d3;
+  --el-color-primary-light-9: #ddf1ef;
+  --el-color-primary-rgb: 23, 130, 122 !important;
   
   --el-bg-color: var(--bg-color) !important;
   --el-text-color-primary: var(--text-color) !important;
   --el-border-color: var(--border-color) !important;
-  --el-border-color-light: #ecece7 !important; /* 极浅的分割线 */
+  --el-border-color-light: #eae9e4 !important;
 
   /* 组件颜色 */
   --el-button-bg-color: var(--el-color-primary) !important;
-  --el-input-bg-color: #f2f2ef !important; /* 输入框微陷，采用比卡片深一点的低饱和浅灰 */
+  --el-input-bg-color: #f2f1ed !important;
   
-  /* 🌟 核心修改：大面积页面底色 - 采用类似 Notion 的高定哑光浅灰（微暖） */
-  /* 这能完美衬托出上方纯白卡片的悬浮感，而且大面积看一点都不刺眼，也绝对不黄 */
-  --el-bg-color-page: #f5f4f0 !important; 
-  --el-tabs-bg-color: #f5f4f0 !important;
+  /* 页面底色：暖灰基底，衬托卡片悬浮层次 */
+  --el-bg-color-page: #f3f2ed !important; 
+  --el-tabs-bg-color: #f3f2ed !important;
   
-  /* 侧边栏和菜单融入页面底色，制造现代UI的无界感 */
   --el-menu-bg-color: var(--el-bg-color-page) !important; 
   --el-table-bg-color: var(--bg-color) !important;
-  --el-tag-bg-color: #f0f0eb !important;
+  --el-tag-bg-color: #efeeea !important;
   
-  /* 状态颜色 - 保持莫兰迪高级感 */
-  --el-color-success: #639c71 !important;
-  --el-color-warning: #d4a35c !important;
-  --el-color-danger: #c76565 !important;
-  --el-color-info: #8f8f8b !important;
+  /* 状态颜色 - iOS 式克制饱和 */
+  --el-color-success: #3d8f5e !important;
+  --el-color-warning: #d4913a !important;
+  --el-color-danger: #c95050 !important;
+  --el-color-info: #6e6dc4 !important;
   
-  /* 文字颜色 */
-  --el-text-color-regular: #5f5e5a !important;
-  --el-text-color-secondary: #8c8b87 !important;
+  /* 文字层级 */
+  --el-text-color-regular: #585753 !important;
+  --el-text-color-secondary: #878682 !important;
   
-  /* 阴影 - 极度柔和的空气感弥散阴影，这是高级感的关键 */
+  /* 弥散空气感阴影 */
   --el-box-shadow-light: 0 8px 24px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.02) !important;
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 
-  /* Input 调整 */
+  /* Input */
   --el-input-text-color: var(--text-color);
-  --el-input-placeholder-color: #b5b4ae;
+  --el-input-placeholder-color: #b0afaa;
   --el-input-hover-border-color: var(--el-color-primary-light-3);
   --el-input-focus-border-color: var(--el-color-primary);
 
-  /* 代码块 - 区别于纯白，采用淡淡的背景底色 */
-  --code-bg: #f4f4f1;
-  --code-border: #e6e5e0;
-  
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  /* 代码块 */
+  --code-bg: #f3f2ee;
+  --code-border: #e4e3de;
 }
 
 /* =========================================
-   暗色主题：深空石墨风格 (Space Slate) - 通透无压抑感
+   暗色主题：Noir Copper - Claude 暖铜 + iOS 深度黑层次
    ========================================= */
 [data-theme="dark"] {
-  /* 基础颜色 - 告别死黑，采用稍微提亮的石墨灰 */
-  --bg-color: #2c2c2e; 
-  /* 字体 - 采用浅银灰，避免黑暗环境下的刺眼白光 */
-  --text-color: #d1d1d6; 
-  --border-color: #3a3a3c;
+  --bg-color: #212124;
+  --text-color: #e4e4e7;
+  --border-color: #363639;
   
-  /* 主色调：琥珀橙 */
-  --el-color-primary: #d97706; 
-  --el-color-primary-light-3: #f59e0b;
-  --el-color-primary-light-5: #fbbf24;
-  --el-color-primary-light-7: #fcd34d;
-  --el-color-primary-light-9: #fef3c7;
-  --el-color-primary-rgb: 217, 119, 6 !important;
+  /* 主色调：温润古铜 (Claude-inspired warmth) */
+  --el-color-primary: #c8815a; 
+  --el-color-primary-light-3: #d49b7a;
+  --el-color-primary-light-5: #dfb49a;
+  --el-color-primary-light-7: #eacebb;
+  --el-color-primary-light-9: #f4e6dd;
+  --el-color-primary-rgb: 200, 129, 90 !important;
 
   --el-bg-color: var(--bg-color) !important;
   --el-text-color-primary: var(--text-color) !important;
   --el-border-color: var(--border-color) !important;
-  --el-border-color-light: #48484a !important;
+  --el-border-color-light: #46464a !important;
 
-  /* 组件颜色 */
-  --el-button-bg-color: #3a3a3c !important;
-  --el-input-bg-color: #242426 !important; /* 输入框略微下陷 */
+  --el-button-bg-color: #2c2c30 !important;
+  --el-input-bg-color: #19191d !important;
   
-  /* 🌟 核心修改：大面积页面底色 - 采用 macOS 风格的深空灰，有透气感，不压抑 */
-  --el-bg-color-page: #1c1c1e !important; 
-  --el-tabs-bg-color: #1c1c1e !important;
+  /* 页面底色：更深的基底，制造卡片悬浮深度 */
+  --el-bg-color-page: #161618 !important; 
+  --el-tabs-bg-color: #161618 !important;
   
-  /* 侧边栏融入背景 */
   --el-menu-bg-color: var(--el-bg-color-page) !important;
-  --el-table-bg-color: #2c2c2e !important;
-  --el-tag-bg-color: rgba(217, 119, 6, 0.15) !important;
+  --el-table-bg-color: #212124 !important;
+  --el-tag-bg-color: rgba(200, 129, 90, 0.12) !important;
 
-  /* 状态颜色 */
-  --el-color-success: #7ea381 !important;
-  --el-color-warning: #ccac70 !important;
-  --el-color-danger: #cf7676 !important;
-  --el-color-info: #858580 !important;
+  /* 状态颜色 - iOS 深色模式风格 */
+  --el-color-success: #3d9a6d !important;
+  --el-color-warning: #d9a03c !important;
+  --el-color-danger: #d94a4a !important;
+  --el-color-info: #7c7dd4 !important;
 
-  /* 文字颜色 */
-  --el-text-color-regular: #a1a1aa !important;
-  --el-text-color-secondary: #71717a !important;
+  /* 文字层级 */
+  --el-text-color-regular: #b0b0b6 !important;
+  --el-text-color-secondary: #808086 !important;
 
-  /* 阴影 - 柔和的深色投影，让卡片在石墨底色上凸显层次 */
-  --el-box-shadow-light: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  /* 深色层次阴影 */
+  --el-box-shadow-light: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
 
-  --el-input-text-color: #d1d1d6;
-  --el-input-placeholder-color: #71717a;
-  --el-input-hover-border-color: var(--el-color-primary-light-5);
-  --el-input-focus-border-color: var(--el-color-primary-light-7);
+  --el-input-text-color: #e4e4e7;
+  --el-input-placeholder-color: #60606a;
+  --el-input-hover-border-color: var(--el-color-primary-light-3);
+  --el-input-focus-border-color: var(--el-color-primary-light-5);
   
-  --el-input-disabled-bg-color: #1c1c1e;
-  --el-input-disabled-border-color: #2c2c2e;
+  --el-input-disabled-bg-color: #161618;
+  --el-input-disabled-border-color: #212124;
 
-  --code-bg: #242426;
-  --code-border: #3a3a3c;
-  
-  --card-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+  --code-bg: #19191d;
+  --code-border: #363639;
+
+  /* 中性填充色 */
+  --el-fill-color-blank: #212124 !important;
+  --el-fill-color-extra-light: #1c1c1f !important;
+  --el-fill-color-lighter: #242428 !important;
+  --el-fill-color-light: #2a2a2e !important;
+  --el-fill-color: #303035 !important;
+  --el-fill-color-dark: #38383d !important;
+  --el-fill-color-darker: #404045 !important;
+  --el-text-color-placeholder: #5e5e68 !important;
+  --el-text-color-disabled: #484850 !important;
 }
 
-/* 新增 Ocean Midnight 主题 */
+/* Deep Azure - iOS 深蓝 + 精准靛青主色 */
 [data-theme="midnight"] {
-  /* 基础三色 */
-  --bg-color: #0f172a;         /* 深海军蓝背景 */
-  --text-color: #e2e8f0;       /* 柔和灰白色文字 */
-  --border-color: #334155;     /* 中灰蓝色边框 */
+  --bg-color: #0c1424;
+  --text-color: #e6ebf4;
+  --border-color: #253248;
 
-  /* 主色调 - 青蓝色 */
-  --el-color-primary: #ee7e00;
-  --el-color-primary-light-3: #ec8e23;
-  --el-color-primary-light-5: #eba351;
-  --el-color-primary-light-7: #deb88b;
-  --el-color-primary-light-9: #e7dacb;
-  --el-color-primary-rgb: 14, 165, 233 !important;
+  /* 主色调：Azure Blue (修复原 RGB 与 hex 不一致的问题) */
+  --el-color-primary: #4d94f0;
+  --el-color-primary-light-3: #74aef5;
+  --el-color-primary-light-5: #9bc7f8;
+  --el-color-primary-light-7: #c2dffb;
+  --el-color-primary-light-9: #e5f1fd;
+  --el-color-primary-rgb: 77, 148, 240 !important;
   
-  /* 背景系统 */
   --el-bg-color: var(--bg-color) !important;
-  --el-bg-color-page: #1e293b !important;      /* 稍浅页面背景 */
-  --el-tabs-bg-color: #1e293b !important;      /* 稍浅标签页背景 */
-  --el-bg-color-overlay: #1e293b !important;   /* 浮层背景 */
+  --el-bg-color-page: #0e172a !important;
+  --el-tabs-bg-color: #0e172a !important;
+  --el-bg-color-overlay: #142038 !important;
 
-  /* 文字系统 */
   --el-text-color-primary: var(--text-color) !important;
-  --el-text-color-regular: #cbd5e1 !important; /* 次级文字 */
-  --el-text-color-secondary: #94a3b8 !important; /* 三级文字 */
+  --el-text-color-regular: #bcc7d8 !important;
+  --el-text-color-secondary: #8090a8 !important;
   
-  /* 边框系统 */
   --el-border-color: var(--border-color) !important;
-  --el-border-color-light: #475569 !important; /* 更浅边框 */
-  --el-border-color-lighter: #64748b !important;
+  --el-border-color-light: #364860 !important;
+  --el-border-color-lighter: #4e607a !important;
 
-  /* 组件特定 */
-  --el-button-bg-color: #1e40af !important;     /* 深蓝色按钮 */
-  --el-input-bg-color: #1e293b !important;      /* 输入框背景 */
-  --el-menu-bg-color: #0f172a !important;       /* 菜单背景 */
-  --el-table-bg-color: #0f172a !important;      /* 表格背景 */
-  --el-tag-bg-color: rgba(14, 165, 233, 0.15) !important; /* 半透明标签 */
+  --el-button-bg-color: #1e3a6e !important;
+  --el-input-bg-color: #101c30 !important;
+  --el-menu-bg-color: #0c1424 !important;
+  --el-table-bg-color: #0c1424 !important;
+  --el-tag-bg-color: rgba(77, 148, 240, 0.14) !important;
   
-  /* 状态颜色 */
-  --el-color-success: #22c55e !important;       /* 鲜绿色 */
-  --el-color-warning: #ebd263 !important;
-  --el-color-danger: #ef4444 !important;        /* 亮红色 */
-  --el-color-info: #8b5cf6 !important;          /* 紫罗兰色 */
+  --el-color-success: #2ea85a !important;
+  --el-color-warning: #d4a640 !important;
+  --el-color-danger: #e04a4a !important;
+  --el-color-info: #8b7cd4 !important;
   
-  /* 阴影效果 */
-  --el-box-shadow-light: 0 4px 16px rgba(2, 132, 199, 0.2) !important; /* 蓝色调阴影 */
-  --card-shadow: 0 4px 12px rgba(14, 165, 233, 0.15); /* 卡片发光效果 */
+  --el-box-shadow-light: 0 4px 16px rgba(2, 132, 199, 0.2) !important;
+  --card-shadow: 0 4px 12px rgba(77, 148, 240, 0.12);
 
-  /* 输入框系统 */
   --el-input-text-color: var(--text-color);
-  --el-input-placeholder-color: #94a3b8;
+  --el-input-placeholder-color: #687890;
   --el-input-hover-border-color: var(--el-color-primary-light-5);
   --el-input-focus-border-color: var(--el-color-primary);
-  --el-input-disabled-bg-color: #1e293b;
+  --el-input-disabled-bg-color: #0e172a;
 
-  /* 代码块 */
-  --code-bg: #1e293b;
-  --code-border: #334155;
+  --code-bg: #101c30;
+  --code-border: #253248;
+
+  --el-fill-color-blank: #0e172a !important;
+  --el-fill-color-extra-light: #0b1224 !important;
+  --el-fill-color-lighter: #101c30 !important;
+  --el-fill-color-light: #16243e !important;
+  --el-fill-color: #1e3050 !important;
+  --el-fill-color-dark: #283c60 !important;
+  --el-fill-color-darker: #324868 !important;
+  --el-text-color-placeholder: #5a6a84 !important;
+  --el-text-color-disabled: #3e4e64 !important;
 }
 
-/* 配套代码高亮主题 */
+/* 配套代码高亮 - Deep Azure */
 [data-theme="midnight"] {
-  --hljs-text: #e2e8f0;
-  --hljs-bg: #1e293b;
-  --hljs-border: rgba(99, 102, 241, 0.2);
-  --hljs-keyword: #818cf8;        /* 薰衣草紫 */
-  --hljs-string: #0ea5e9;         /* 主色青蓝 */
-  --hljs-number: #22d3ee;         /* 青色 */
-  --hljs-comment: #94a3b8;        /* 灰蓝色 */
-  --hljs-title: #67e8f9;          /* 亮青色 */
-  --hljs-built_in: #c084fc;       /* 浅紫色 */
-  --hljs-literal: #f472b6;        /* 粉红色 */
-  --hljs-class: #38bdf8;          /* 浅青蓝 */
-  --hljs-function: #60a5fa;       /* 钴蓝色 */
-  --hljs-params: #a5f3fc;         /* 水青色 */
-  --hljs-attr: #34d399;           /* 翡翠绿 */
+  --hljs-text: #e6ebf4;
+  --hljs-bg: #101c30;
+  --hljs-border: rgba(77, 148, 240, 0.2);
+  --hljs-keyword: #9b8cf0;
+  --hljs-string: #4d94f0;
+  --hljs-number: #5eb8d4;
+  --hljs-comment: #687890;
+  --hljs-title: #74b8f8;
+  --hljs-built_in: #c89bf0;
+  --hljs-literal: #f080a0;
+  --hljs-class: #5eb8f4;
+  --hljs-function: #7baaf0;
+  --hljs-params: #a0d4f8;
+  --hljs-attr: #3daa70;
 }
 
-/* 多巴胺主题 - 高饱和度愉悦配色 */
+/* Synthwave Glass - 霓虹克制版：深邃紫晶基底 + 电光玫红 */
 [data-theme="neon"] {
-  /* 基础三色 */
-  --bg-color: #1a0933;          /* 深紫罗兰背景（增强鲜艳色对比） */
-  --text-color: #f0f0ff;        /* 柔光白文字 */
-  --border-color: #6a45d1;      /* 霓虹紫边框 */
+  --bg-color: #140a2e;
+  --text-color: #f0eeff;
+  --border-color: #4a3588;
 
-  /* 主色调 - 荧光粉 */
-  --el-color-primary: #ff2d95;  /* 高饱和品红 */
-  --el-color-primary-light-3: #ff5eaa;
-  --el-color-primary-light-5: #ff8fc0;
-  --el-color-primary-light-7: #ffc0d6;
-  --el-color-primary-rgb: 255, 45, 149 !important;
+  /* 主色调：电光玫红 (降饱和、保留能量) */
+  --el-color-primary: #e04090;
+  --el-color-primary-light-3: #e668a8;
+  --el-color-primary-light-5: #ec90c0;
+  --el-color-primary-light-7: #f3b8d8;
+  --el-color-primary-light-9: #fae0ef;
+  --el-color-primary-rgb: 224, 64, 144 !important;
   
-  /* 背景系统 */
   --el-bg-color: var(--bg-color) !important;
-  --el-bg-color-page: #27104e !important;      /* 渐变紫色 */
-  --el-tabs-bg-color: #27104e !important;      /* 渐变紫色 */
-  --el-bg-color-overlay: #351f63 !important;   /* 霓虹灯牌效果 */
+  --el-bg-color-page: #1b0e3c !important;
+  --el-tabs-bg-color: #1b0e3c !important;
+  --el-bg-color-overlay: #241550 !important;
 
-  /* 文字系统 */
   --el-text-color-primary: var(--text-color) !important;
-  --el-text-color-regular: #d6c2ff !important; /* 薰衣草紫 */
-  --el-text-color-secondary: #a98fff !important; 
-
-  /* 边框系统 */
+  --el-text-color-regular: #d0c8f0 !important;
+  --el-text-color-secondary: #a898d0 !important;
+  
   --el-border-color: var(--border-color) !important;
-  --el-border-color-light: #8d6de9 !important; /* 亮紫色 */
-  --el-border-color-lighter: #b9a0ff !important;
+  --el-border-color-light: #6850a0 !important;
+  --el-border-color-lighter: #9078c8 !important;
 
-  /* 组件特定 */
-  --el-button-bg-color: #ff2d95 !important;    /* 荧光粉按钮 */
-  --el-input-bg-color: #2d1b5b !important;     /* 深紫晶背景 */
-  --el-menu-bg-color: rgba(26, 9, 51, 0.85) !important;
-  --el-table-bg-color: #1a0933 !important;
-  --el-tag-bg-color: rgba(255, 45, 149, 0.2) !important;
+  --el-button-bg-color: #e04090 !important;
+  --el-input-bg-color: #1f1040 !important;
+  --el-menu-bg-color: rgba(20, 10, 46, 0.88) !important;
+  --el-table-bg-color: #140a2e !important;
+  --el-tag-bg-color: rgba(224, 64, 144, 0.18) !important;
   
-  /* 多巴胺特色状态色 */
-  --el-color-success: #39ff14 !important;     /* 荧光绿 */
-  --el-color-warning: #ffde59 !important;      /* 柠檬黄 */
-  --el-color-danger: #ff2a6d !important;       /* 电光粉 */
-  --el-color-info: #05d9e8 !important;         /* 青蓝色 */
+  --el-color-success: #40d878 !important;
+  --el-color-warning: #e8c840 !important;
+  --el-color-danger: #f04060 !important;
+  --el-color-info: #40c8e8 !important;
   
-  /* 发光效果阴影 */
-  --el-box-shadow-light: 0 0 15px rgba(255, 45, 149, 0.4), 
-                         0 0 30px rgba(101, 0, 255, 0.3) !important;
-  --card-shadow: 0 0 20px rgba(255, 45, 149, 0.3), 
-                 0 0 40px rgba(101, 0, 255, 0.2);
+  --el-box-shadow-light: 0 0 15px rgba(224, 64, 144, 0.3), 
+                         0 0 30px rgba(80, 40, 160, 0.2) !important;
+  --card-shadow: 0 0 20px rgba(224, 64, 144, 0.22), 
+                 0 0 40px rgba(80, 40, 160, 0.14);
 
-  /* 输入框系统 */
-  --el-input-text-color: #f0f0ff;
-  --el-input-placeholder-color: #b9a0ff;
-  --el-input-hover-border-color: #ff5eaa;
-  --el-input-focus-border-color: #ff2d95;
-  --el-input-disabled-bg-color: #2a1150;
+  --el-input-text-color: #f0eeff;
+  --el-input-placeholder-color: #9078c8;
+  --el-input-hover-border-color: #e668a8;
+  --el-input-focus-border-color: #e04090;
+  --el-input-disabled-bg-color: #1a0c38;
 
-  /* 代码块 */
-  --code-bg: #2d1b5b;
-  --code-border: #6a45d1;
+  --code-bg: #1f1040;
+  --code-border: #4a3588;
+
+  --el-fill-color-blank: #1f1040 !important;
+  --el-fill-color-extra-light: #180c34 !important;
+  --el-fill-color-lighter: #231450 !important;
+  --el-fill-color-light: #2c1a60 !important;
+  --el-fill-color: #352070 !important;
+  --el-fill-color-dark: #3e2880 !important;
+  --el-fill-color-darker: #483090 !important;
+  --el-text-color-placeholder: #9080b8 !important;
+  --el-text-color-disabled: #6858a0 !important;
 }
 
-/* 配套代码高亮主题 */
+/* 配套代码高亮 - Synthwave */
 [data-theme="neon"] {
-  --hljs-text: #f0f0ff;
-  --hljs-bg: #2d1b5b;
-  --hljs-border: rgba(106, 69, 209, 0.4);
-  --hljs-keyword: #ff2d95;       /* 荧光粉 */
-  --hljs-string: #39ff14;        /* 荧光绿 */
-  --hljs-number: #ffde59;        /* 柠檬黄 */
-  --hljs-comment: #b9a0ff;       /* 薰衣草紫 */
-  --hljs-title: #05d9e8;         /* 青蓝 */
-  --hljs-built_in: #ff2a6d;      /* 电光粉 */
-  --hljs-literal: #ff8fc0;       /* 浅品红 */
-  --hljs-class: #ff5eaa;         /* 主色渐变 */
-  --hljs-function: #8d6de9;      /* 亮紫色 */
-  --hljs-params: #ffde59;        /* 柠檬黄 */
-  --hljs-attr: #05d9e8;          /* 青蓝 */
+  --hljs-text: #f0eeff;
+  --hljs-bg: #1f1040;
+  --hljs-border: rgba(74, 53, 136, 0.4);
+  --hljs-keyword: #e04090;
+  --hljs-string: #40d878;
+  --hljs-number: #e8c840;
+  --hljs-comment: #9078c8;
+  --hljs-title: #40c8e8;
+  --hljs-built_in: #f04060;
+  --hljs-literal: #e668a8;
+  --hljs-class: #e668a8;
+  --hljs-function: #6850a0;
+  --hljs-params: #e8c840;
+  --hljs-attr: #40c8e8;
 }
 
-/* 棉花糖主题 */
+/* Soft Blush - iOS 浅色柔光：樱花粉 + 薄荷蓝双色调 */
 [data-theme="marshmallow"] {
-  /* 基础三要素 */
-  --bg-color: #e6f7ff;         /* 极浅水蓝背景 */
-  --text-color: #2e2a36;       /* 深紫灰色文字 */
-  --border-color: #c2d6e3;     /* 浅灰蓝色边框 */
+  --bg-color: #f6f9fc;
+  --text-color: #322e3a;
+  --border-color: #d8e0e8;
 
-  /* 主色调 - 樱花粉 */
-  --el-color-primary: #f5a5c3 !important;
-  --el-color-primary-light-3: #f8bbd3;
-  --el-color-primary-light-5: #fad1e1;
-  --el-color-primary-light-7: #fde8f0;
-  --el-color-primary-rgb: 245, 165, 195 !important;
+  /* 主色调：山茶花粉 (更克制的樱花色) */
+  --el-color-primary: #e29aaa !important;
+  --el-color-primary-light-3: #e9b0bc;
+  --el-color-primary-light-5: #f0c6cf;
+  --el-color-primary-light-7: #f6dce2;
+  --el-color-primary-rgb: 226, 154, 170 !important;
   
-  /* 辅助色 - 浅水蓝 */
-  --el-color-info: #99d8e0 !important;
-  --el-color-info-light-3: #b3e3e8;
-  --el-color-info-light-5: #cceef0;
+  /* 辅助色：冰薄荷 */
+  --el-color-info: #7ec8d0 !important;
+  --el-color-info-light-3: #9ed6dc;
+  --el-color-info-light-5: #bee4e8;
   
-  /* 背景系统 */
   --el-bg-color: var(--bg-color) !important;
-  --el-bg-color-page: #d4f1f5 !important;      /* 更亮的水蓝 */
-  --el-tabs-bg-color: #d4f1f5 !important;      /* 更亮的水蓝 */
-  --el-bg-color-overlay: #ffffff !important;   /* 纯白浮层 */
+  --el-bg-color-page: #eef5f8 !important;
+  --el-tabs-bg-color: #eef5f8 !important;
+  --el-bg-color-overlay: #ffffff !important;
 
-  /* 文字系统 */
-  --el-text-color-primary: #3a2e4a !important;  /* 深紫罗兰 */
-  --el-text-color-regular: #5a4e6a !important;
-  --el-text-color-secondary: #8c7b99 !important;
+  --el-text-color-primary: #3a2e44 !important;
+  --el-text-color-regular: #5c4e64 !important;
+  --el-text-color-secondary: #8c7c94 !important;
   
-  /* 边框系统 */
-  --el-border-color: #e0c4d3 !important;       /* 浅粉灰 */
-  --el-border-color-light: #f0dde6 !important;
-  --el-border-color-lighter: #f8eef3 !important;
+  --el-border-color: #e0d4dc !important;
+  --el-border-color-light: #f0e8ee !important;
+  --el-border-color-lighter: #f8f2f6 !important;
 
-  /* 组件设计 */
   --el-button-bg-color: var(--el-color-primary) !important;
-  --el-input-bg-color: #ffffff !important;      /* 纯白输入框 */
-  --el-menu-bg-color: #f9f2f5 !important;       /* 极浅粉背景 */
+  --el-input-bg-color: #ffffff !important;
+  --el-menu-bg-color: #f6f0f4 !important;
   --el-table-bg-color: #ffffff !important;
-  --el-tag-bg-color: rgba(245, 165, 195, 0.15) !important;
+  --el-tag-bg-color: rgba(226, 154, 170, 0.14) !important;
   
-  /* 状态颜色（增强对比） */
-  --el-color-success: #8bd48d !important;       /* 薄荷绿 */
-  --el-color-warning: #ffd166 !important;       /* 奶油黄 */
-  --el-color-danger: #ff6b6b !important;        /* 珊瑚红 */
+  --el-color-success: #7cc48a !important;
+  --el-color-warning: #e8c860 !important;
+  --el-color-danger: #e86868 !important;
   
-  /* 阴影效果 */
-  --el-box-shadow-light: 0 4px 16px rgba(245, 165, 195, 0.2) !important;
-  --card-shadow: 0 4px 12px rgba(153, 216, 224, 0.15); /* 水蓝阴影 */
+  --el-box-shadow-light: 0 4px 16px rgba(226, 154, 170, 0.18) !important;
+  --card-shadow: 0 4px 12px rgba(126, 200, 208, 0.12);
 
-  /* 输入框系统 */
-  --el-input-text-color: #4a3b5a;
-  --el-input-placeholder-color: #c0a4b8;
+  --el-input-text-color: #4a3c54;
+  --el-input-placeholder-color: #c0a8b8;
   --el-input-hover-border-color: var(--el-color-primary-light-3);
   --el-input-focus-border-color: var(--el-color-primary);
-  --el-input-disabled-bg-color: #f8f5fa;
+  --el-input-disabled-bg-color: #f6f2f8;
 
-  /* 代码块 */
   --code-bg: #ffffff;
-  --code-border: #f0dde6;
+  --code-border: #f0e4ec;
 }
 
-/* 配套糖果色代码高亮 */
+/* 配套代码高亮 - Soft Blush */
 [data-theme="marshmallow"] {
-  --hljs-text: #4a3b5a;
-  --hljs-bg: #fff5f9;
-  --hljs-border: #f8d7e6;
-  --hljs-keyword: #f5a5c3;        /* 主色粉 */
-  --hljs-string: #99d8e0;         /* 水蓝色 */
-  --hljs-number: #ff9aa2;         /* 珊瑚粉 */
-  --hljs-comment: #c0a4b8;        /* 灰紫色 */
-  --hljs-title: #8bd48d;          /* 薄荷绿 */
-  --hljs-built_in: #ffd166;       /* 奶油黄 */
-  --hljs-literal: #ff6b6b;        /* 珊瑚红 */
-  --hljs-class: #c9a2e0;          /* 淡紫色 */
-  --hljs-function: #a5d8f5;       /* 浅天蓝 */
-  --hljs-params: #7b8c9d;         /* 灰蓝色 */
-  --hljs-attr: #76c893;           /* 翡翠绿 */
+  --hljs-text: #4a3c54;
+  --hljs-bg: #fefafa;
+  --hljs-border: #f0dce4;
+  --hljs-keyword: #e29aaa;
+  --hljs-string: #7ec8d0;
+  --hljs-number: #e89880;
+  --hljs-comment: #c0a8b8;
+  --hljs-title: #7cc48a;
+  --hljs-built_in: #e8c860;
+  --hljs-literal: #e86868;
+  --hljs-class: #c0a0dc;
+  --hljs-function: #98c8e4;
+  --hljs-params: #7c8c98;
+  --hljs-attr: #6cc880;
 }
 
 /* =========================================
-   NEW THEME: RAINBOW (Holographic Prism)
+   RAINBOW - Holographic Prism：全息棱镜升级
    ========================================= */
 
 [data-theme="rainbow"] {
-  /* --- 核心背景：珍珠母贝质感的微光渐变 --- */
-  --bg-color: #f8f9fe;
-  --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  --bg-color: #f8f7fc;
+  --bg-gradient: linear-gradient(135deg, #fdfbfc 0%, #ebeaf0 100%);
   
-  /* --- 文字系统：深邃的靛青色，而非纯黑 --- */
-  --text-color: #43436a; 
-  --text-secondary: #7e7e9e;
+  --text-color: #3c3a58; 
+  --text-secondary: #7876a0;
   
-  /* --- 边框：半透明的炫彩 --- */
   --border-color: rgba(255, 255, 255, 0.6);
-  --border-gradient: linear-gradient(to right, #a18cd1 0%, #fbc2eb 100%);
+  --border-gradient: linear-gradient(to right, #8878d0 0%, #f0a8c8 100%);
 
-  /* --- 核心主色：梦幻紫 (作为锚点颜色) --- */
-  --el-color-primary: #845ec2; 
-  --el-color-primary-light-3: #9b7ad6;
-  --el-color-primary-light-5: #b397e0;
-  --el-color-primary-light-7: #ccb5eb;
-  --el-color-primary-light-9: #e6d6f5;
-  --el-color-primary-rgb: 132, 94, 194 !important;
+  /* 核心主色：鸢尾紫 */
+  --el-color-primary: #7a5cc0; 
+  --el-color-primary-light-3: #9678d4;
+  --el-color-primary-light-5: #b098e0;
+  --el-color-primary-light-7: #ccb8ec;
+  --el-color-primary-light-9: #e8dcf6;
+  --el-color-primary-rgb: 122, 92, 192 !important;
 
-  /* --- 全局组件覆盖 --- */
-  --el-bg-color: rgba(255, 255, 255, 0.85) !important; /* 卡片背景半透明 */
-  --el-bg-color-page: #f4f6f9 !important;
+  --el-bg-color: rgba(255, 255, 255, 0.85) !important;
+  --el-bg-color-page: #f2f0f8 !important;
   --el-bg-color-overlay: #ffffff !important;
   
   --el-text-color-primary: var(--text-color) !important;
-  --el-text-color-regular: #5e5e80 !important;
+  --el-text-color-regular: #585680 !important;
   --el-text-color-secondary: var(--text-secondary) !important;
   
-  --el-border-color: #e6e8f0 !important;
-  --el-border-color-light: #f0f2f7 !important;
+  --el-border-color: #e4e2f0 !important;
+  --el-border-color-light: #f0eef6 !important;
 
-  /* --- 特殊组件颜色 --- */
   --el-button-bg-color: var(--el-color-primary) !important;
   --el-input-bg-color: rgba(255, 255, 255, 0.9) !important;
-  --el-menu-bg-color: transparent !important; /* 菜单透明以显示背景 */
-  --el-tag-bg-color: rgba(132, 94, 194, 0.1) !important;
+  --el-menu-bg-color: transparent !important;
+  --el-tag-bg-color: rgba(122, 92, 192, 0.1) !important;
 
-  /* --- 状态颜色 (采用马卡龙色系) --- */
-  --el-color-success: #00b894 !important; /* 薄荷绿 */
-  --el-color-warning: #fdcb6e !important; /* 芥末黄 */
-  --el-color-danger: #ff7675 !important;  /* 柔和红 */
-  --el-color-info: #74b9ff !important;    /* 天空蓝 */
+  --el-color-success: #00a878 !important;
+  --el-color-warning: #f0b840 !important;
+  --el-color-danger: #f06868 !important;
+  --el-color-info: #68a8f0 !important;
 
-  /* --- 核心特征：彩色弥散阴影 --- */
-  --el-box-shadow-light: 0 8px 32px 0 rgba(132, 94, 194, 0.15);
-  --card-shadow: 0 10px 40px -10px rgba(161, 140, 209, 0.3);
+  --el-box-shadow-light: 0 8px 32px 0 rgba(122, 92, 192, 0.14);
+  --card-shadow: 0 10px 40px -10px rgba(136, 120, 208, 0.28);
   
-  /* --- 代码块 --- */
   --code-bg: #ffffff;
-  --code-border: #e6e8f0;
+  --code-border: #e4e2f0;
   
-  /* 定义彩虹渐变变量供后续使用 */
-  --rainbow-gradient: linear-gradient(120deg, #845ec2, #d65db1, #ff6f91, #ff9671, #ffc75f, #f9f871);
+  --rainbow-gradient: linear-gradient(120deg, #7a5cc0, #c850a8, #f06868, #f09850, #f0c040, #e8e860);
 }
 
 /* -----------------------------------
@@ -442,15 +430,15 @@
     radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%), 
     radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, transparent 50%), 
     radial-gradient(at 100% 0%, hsla(339,49%,30%,0) 0, transparent 50%);
-  background-color: #f3f4f6;
+  background-color: #f2f0f6;
   background-image: 
-    radial-gradient(at 80% 0%, hsla(189,100%,56%,0.1) 0px, transparent 50%),
-    radial-gradient(at 0% 50%, hsla(355,100%,93%,0.1) 0px, transparent 50%),
-    radial-gradient(at 80% 50%, hsla(340,100%,76%,0.1) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(22,100%,77%,0.1) 0px, transparent 50%),
-    radial-gradient(at 80% 100%, hsla(240,100%,70%,0.1) 0px, transparent 50%),
-    radial-gradient(at 0% 0%, hsla(343,100%,76%,0.1) 0px, transparent 50%);
-  background-attachment: fixed; /* 固定背景，营造高级感 */
+    radial-gradient(at 80% 0%, hsla(189,100%,56%,0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(355,100%,93%,0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, hsla(340,100%,76%,0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(22,100%,77%,0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, hsla(240,100%,70%,0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(343,100%,76%,0.08) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
 /* 2. 侧边栏：磨砂玻璃 */
@@ -478,23 +466,23 @@
 [data-theme="rainbow"] .provider-card:hover,
 [data-theme="rainbow"] .vendor-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(132, 94, 194, 0.15), 
-              0 5px 15px rgba(255, 150, 113, 0.1) !important;
-  border-color: #d65db1 !important;
+  box-shadow: 0 15px 30px rgba(122, 92, 192, 0.15), 
+              0 5px 15px rgba(240, 152, 80, 0.1) !important;
+  border-color: #c850a8 !important;
 }
 
 /* 4. 按钮：流光渐变 */
 [data-theme="rainbow"] .el-button--primary {
-  background-image: linear-gradient(to right, #845ec2 0%, #b39cd0 51%, #845ec2 100%) !important;
+  background-image: linear-gradient(to right, #7a5cc0 0%, #a898d8 51%, #7a5cc0 100%) !important;
   background-size: 200% auto !important;
   border: none !important;
   transition: 0.5s !important;
-  box-shadow: 0 4px 15px 0 rgba(132, 94, 194, 0.35);
+  box-shadow: 0 4px 15px 0 rgba(122, 92, 192, 0.35);
 }
 
 [data-theme="rainbow"] .el-button--primary:hover {
   background-position: right center !important;
-  box-shadow: 0 4px 15px 0 rgba(132, 94, 194, 0.5);
+  box-shadow: 0 4px 15px 0 rgba(122, 92, 192, 0.5);
   transform: scale(1.02);
 }
 
@@ -518,14 +506,13 @@
 
 /* 7. 选中状态优化 */
 [data-theme="rainbow"] .el-menu-item.is-active {
-  background: linear-gradient(90deg, rgba(132, 94, 194, 0.1), transparent) !important;
-  color: #845ec2 !important;
-  border-left: 3px solid #845ec2;
+  background: var(--el-color-primary-light-9) !important;
+  color: var(--el-color-primary) !important;
 }
 
 /* 8. 滚动条：细长的彩虹 */
 [data-theme="rainbow"] ::-webkit-scrollbar-thumb {
-  background-image: linear-gradient(to bottom, #845ec2, #ff9671);
+  background-image: linear-gradient(to bottom, #7a5cc0, #f09850);
   border-radius: 10px;
 }
 
@@ -533,278 +520,244 @@
    Rainbow 主题代码高亮 (Light Elegant)
    ========================================= */
 [data-theme="rainbow"] {
-  --hljs-text: #43436a;
-  --hljs-bg: #fdfdff;
-  --hljs-border: rgba(132, 94, 194, 0.2);
-  
-  /* 采用高明度的光谱色 */
-  --hljs-keyword: #845ec2;        /* 皇家紫 */
-  --hljs-string: #00b894;         /* 宝石绿 */
-  --hljs-number: #ff9671;         /* 珊瑚橘 */
-  --hljs-comment: #b0b0d0;        /* 雾霾蓝灰 */
-  --hljs-title: #d65db1;          /* 兰花紫 */
-  --hljs-built_in: #2c98f0;       /* 海洋蓝 */
-  --hljs-literal: #ff6f91;        /* 亮粉红 */
-  --hljs-class: #f9f871;          /* 柠檬黄(需深色背景) -> 调整为深金黄 */
-  --hljs-class: #f9c440;          /* 金黄色 */
-  --hljs-function: #845ec2;
-  --hljs-params: #4b4b4b;
-  --hljs-attr: #0097e6;
+  --hljs-text: #3c3a58;
+  --hljs-bg: #fefdff;
+  --hljs-border: rgba(122, 92, 192, 0.2);
+  --hljs-keyword: #7a5cc0;
+  --hljs-string: #00a878;
+  --hljs-number: #f09850;
+  --hljs-comment: #a8a8c8;
+  --hljs-title: #c850a8;
+  --hljs-built_in: #4898f0;
+  --hljs-literal: #f06868;
+  --hljs-class: #d8b830;
+  --hljs-function: #7a5cc0;
+  --hljs-params: #4a4a4a;
+  --hljs-attr: #2898d8;
 }
 
 
-/* 沙漠主题 */
+/* Terracotta Dune - 沙漠暖色调：陶土赤陶 + 沙丘金层次 */
 [data-theme="desert"] {
-    /* 基础三色 */
-    --bg-color: #f9f2e7;         /* 浅沙色背景 */
-    --text-color: #5c3d2e;       /* 深棕色文字 */
-    --border-color: #d7b98e;     /* 浅褐色边框 */
+    --bg-color: #faf6ed;
+    --text-color: #4a3020;
+    --border-color: #dcc8a0;
     
-    /* 主色调 - 沙丘金/陶土橙 */
-    --el-color-primary: #d98236; /* 陶土橙 */
-    --el-color-primary-light-3: #e39e5d;
-    --el-color-primary-light-5: #edba84;
-    --el-color-primary-light-7: #f7d6ac;
-    --el-color-primary-rgb: 217, 130, 54 !important;
+    /* 主色调：陶土赤陶 */
+    --el-color-primary: #c4784a;
+    --el-color-primary-light-3: #d0946e;
+    --el-color-primary-light-5: #dcb092;
+    --el-color-primary-light-7: #e9cdb6;
+    --el-color-primary-rgb: 196, 120, 74 !important;
     
-    /* 背景系统 */
     --el-bg-color: var(--bg-color) !important;
-    --el-bg-color-page: #f5e8c9 !important;      /* 浅沙色 */
-    --el-tabs-bg-color: #f5e8c9 !important;      /* 浅沙色 */
-    --el-bg-color-overlay: #f0e0b5 !important;   /* 稍深沙色 */
+    --el-bg-color-page: #f2e8d4 !important;
+    --el-tabs-bg-color: #f2e8d4 !important;
+    --el-bg-color-overlay: #efe0c4 !important;
     
-    /* 文字系统 */
     --el-text-color-primary: var(--text-color) !important;
-    --el-text-color-regular: #7d5c3f !important; /* 次级文字 */
-    --el-text-color-secondary: #9e7e5f !important; /* 三级文字 */
+    --el-text-color-regular: #6b4c34 !important;
+    --el-text-color-secondary: #8c6c50 !important;
     
-    /* 边框系统 */
     --el-border-color: var(--border-color) !important;
-    --el-border-color-light: #c9a87c !important; /* 更浅边框 */
-    --el-border-color-lighter: #bb9662 !important;
+    --el-border-color-light: #c8b488 !important;
+    --el-border-color-lighter: #b49c70 !important;
     
-    /* 组件特定 */
-    --el-button-bg-color: #d98236 !important;     /* 陶土橙按钮 */
-    --el-input-bg-color: #f5e8c9 !important;      /* 输入框背景 */
-    --el-menu-bg-color: #f0e0b5 !important;       /* 菜单背景 */
-    --el-table-bg-color: #f9f2e7 !important;      /* 表格背景 */
-    --el-tag-bg-color: rgba(217, 130, 54, 0.15) !important; /* 半透明标签 */
+    --el-button-bg-color: #c4784a !important;
+    --el-input-bg-color: #f2e8d4 !important;
+    --el-menu-bg-color: #efe0c4 !important;
+    --el-table-bg-color: #faf6ed !important;
+    --el-tag-bg-color: rgba(196, 120, 74, 0.14) !important;
     
-    /* 状态颜色 */
-    --el-color-success: #8a9b52 !important;       /* 沙漠绿 */
-    --el-color-warning: #e6a23c !important;       /* 琥珀色 */
-    --el-color-danger: #c4564a !important;        /* 砖红色 */
-    --el-color-info: #a87c52 !important;          /* 胡桃木色 */
+    --el-color-success: #7a8c46 !important;
+    --el-color-warning: #d49838 !important;
+    --el-color-danger: #b84a3e !important;
+    --el-color-info: #9c6e50 !important;
     
-    /* 阴影效果 */
-    --el-box-shadow-light: 0 2px 10px rgba(217, 130, 54, 0.2) !important;
-    --card-shadow: 0 4px 12px rgba(187, 150, 98, 0.15);
+    --el-box-shadow-light: 0 2px 10px rgba(196, 120, 74, 0.18) !important;
+    --card-shadow: 0 4px 12px rgba(180, 156, 112, 0.14);
     
-    /* 输入框系统 */
     --el-input-text-color: var(--text-color);
-    --el-input-placeholder-color: #9e7e5f;
+    --el-input-placeholder-color: #8c6c50;
     --el-input-hover-border-color: var(--el-color-primary-light-3);
     --el-input-focus-border-color: var(--el-color-primary);
-    --el-input-disabled-bg-color: #f0e0b5;
+    --el-input-disabled-bg-color: #efe0c4;
     
-    /* 代码块 */
-    --code-bg: #f5e8c9;
-    --code-border: #d7b98e;
+    --code-bg: #f2e8d4;
+    --code-border: #dcc8a0;
     
-    /* 特殊装饰色 */
-    --sunset-red: #c4564a;
-    --sunset-orange: #e39e5d;
-    --cactus-green: #8a9b52;
+    --sunset-red: #b84a3e;
+    --sunset-orange: #d0946e;
+    --cactus-green: #7a8c46;
 }
 
-/* 派对主题 */
+/* Festival Gold - 派对升级：金橙 + 靛蓝撞色 */
 [data-theme="party"] {
-  /* 基础三色 */
-  --bg-color: #fffbf0;           /* 暖白/奶油色背景 */
-  --text-color: #374151;         /* 深灰蓝色文字 */
-  --border-color: #e5e7eb;       /* 浅灰色边框 */
+  --bg-color: #fffcf4;
+  --text-color: #2d2a34;
+  --border-color: #e8e4d8;
 
-  /* 主色调 - 活力橙 */
-  --el-color-primary: #ed7d00 !important;
-  --el-color-primary-light-3: #f59e0b;
-  --el-color-primary-light-5: #fbbf24;
-  --el-color-primary-light-7: #fde68a;
-  --el-color-primary-rgb: 237, 125, 0 !important;
+  /* 主色调：庆典金橙 */
+  --el-color-primary: #e08a20 !important;
+  --el-color-primary-light-3: #e8a44c;
+  --el-color-primary-light-5: #f0be78;
+  --el-color-primary-light-7: #f6d8a4;
+  --el-color-primary-rgb: 224, 138, 32 !important;
   
-  /* 次要色调 - 深海蓝 */
-  --el-color-info: #21859b !important;
-  --el-color-info-light-3: #0ea5e9;
-  --el-color-info-light-5: #38bdf8;
-  --el-color-info-light-7: #7dd3fc;
-  --el-color-info-rgb: 33, 133, 155 !important;
+  /* 次要色调：靛蓝深海 */
+  --el-color-info: #3b6ea0 !important;
+  --el-color-info-light-3: #5c8cc0;
+  --el-color-info-light-5: #80aad8;
+  --el-color-info-light-7: #a8c8e8;
+  --el-color-info-rgb: 59, 110, 160 !important;
 
-  /* 辅助色调 - 暖棕色 */
-  --el-color-warning: #d97706 !important;
-  --el-color-warning-light-3: #f59e0b;
-  --el-color-warning-light-5: #fbbf24;
+  /* 辅助色调：暖棕 */
+  --el-color-warning: #cc8020 !important;
+  --el-color-warning-light-3: #dc9838;
+  --el-color-warning-light-5: #e8b058;
 
-  /* 背景系统 */
   --el-bg-color: var(--bg-color) !important;
-  --el-bg-color-page: #fef7e6 !important;      /* 更暖的米黄色页面背景 */
-  --el-tabs-bg-color: #fef7e6 !important;      /* 米黄色标签页背景 */
-  --el-bg-color-overlay: #ffffff !important;   /* 纯白浮层背景 */
+  --el-bg-color-page: #faf4e6 !important;
+  --el-tabs-bg-color: #faf4e6 !important;
+  --el-bg-color-overlay: #ffffff !important;
 
-  /* 文字系统 */
-  --el-text-color-primary: #1f2937 !important;  /* 深炭灰色 */
-  --el-text-color-regular: #4b5563 !important; /* 中灰色 */
-  --el-text-color-secondary: #6b7280 !important; /* 浅灰色 */
+  --el-text-color-primary: #1e1c28 !important;
+  --el-text-color-regular: #484458 !important;
+  --el-text-color-secondary: #6c6878 !important;
   
-  /* 边框系统 */
   --el-border-color: var(--border-color) !important;
-  --el-border-color-light: #d1d5db !important; /* 中等灰色边框 */
-  --el-border-color-lighter: #e5e7eb !important;
+  --el-border-color-light: #dcd8cc !important;
+  --el-border-color-lighter: #e8e4d8 !important;
 
-  /* 组件特定 */
   --el-button-bg-color: var(--el-color-primary) !important;
-  --el-input-bg-color: #ffffff !important;      /* 纯白输入框背景 */
-  --el-menu-bg-color: #fef7e6 !important;       /* 米黄色菜单背景 */
-  --el-table-bg-color: #ffffff !important;      /* 纯白表格背景 */
-  --el-tag-bg-color: rgba(237, 125, 0, 0.12) !important; /* 半透明橙色标签 */
+  --el-input-bg-color: #ffffff !important;
+  --el-menu-bg-color: #faf4e6 !important;
+  --el-table-bg-color: #ffffff !important;
+  --el-tag-bg-color: rgba(224, 138, 32, 0.12) !important;
   
-  /* 状态颜色 */
-  --el-color-success: #059669 !important;       /* 深绿色 */
-  --el-color-warning: #d97706 !important;       /* 暖棕色 */
-  --el-color-danger: #dc2626 !important;        /* 深红色 */
+  --el-color-success: #1e8a50 !important;
+  --el-color-danger: #d04040 !important;
   
-  /* 阴影效果 */
-  --el-box-shadow-light: 0 4px 16px rgba(237, 125, 0, 0.18) !important;
-  --card-shadow: 0 4px 12px rgba(33, 133, 155, 0.12); /* 青蓝色调阴影 */
+  --el-box-shadow-light: 0 4px 16px rgba(224, 138, 32, 0.16) !important;
+  --card-shadow: 0 4px 12px rgba(59, 110, 160, 0.1);
 
-  /* 输入框系统 */
   --el-input-text-color: var(--el-text-color-primary);
-  --el-input-placeholder-color: #9ca3af;
+  --el-input-placeholder-color: #9894a0;
   --el-input-hover-border-color: var(--el-color-primary-light-5);
   --el-input-focus-border-color: var(--el-color-primary);
-  --el-input-disabled-bg-color: #f9fafb;
+  --el-input-disabled-bg-color: #f8f6f0;
 
-  /* 导航和菜单 */
-  --el-menu-text-color: #4b5563;
-  --el-menu-hover-bg-color: rgba(237, 125, 0, 0.08);
-  --el-menu-active-bg-color: rgba(237, 125, 0, 0.15);
+  --el-menu-text-color: #484458;
+  --el-menu-hover-bg-color: rgba(224, 138, 32, 0.08);
+  --el-menu-active-bg-color: rgba(224, 138, 32, 0.14);
 
-  /* 代码块 */
-  --code-bg: #fef7e6;
-  --code-border: #e5e7eb;
+  --code-bg: #faf4e6;
+  --code-border: #e8e4d8;
 }
 
-/* 配套代码高亮主题 */
+/* 配套代码高亮 - Festival Gold */
 [data-theme="party"] {
-  --hljs-text: #374151;
-  --hljs-bg: #fef7e6;
-  --hljs-border: rgba(237, 125, 0, 0.2);
-  --hljs-keyword: #ed7d00;        /* 活力橙 */
-  --hljs-string: #21859b;         /* 深海蓝 */
-  --hljs-number: #d97706;         /* 暖棕色 */
-  --hljs-comment: #9ca3af;        /* 中灰色 */
-  --hljs-title: #059669;          /* 深绿色 */
-  --hljs-built_in: #dc2626;       /* 深红色 */
-  --hljs-literal: #f59e0b;        /* 琥珀色 */
-  --hljs-class: #0ea5e9;          /* 青蓝色 */
-  --hljs-function: #4b5563;       /* 中灰色 */
-  --hljs-params: #6b7280;         /* 浅灰色 */
-  --hljs-attr: #10b981;           /* 翡翠绿 */
+  --hljs-text: #2d2a34;
+  --hljs-bg: #faf4e6;
+  --hljs-border: rgba(224, 138, 32, 0.18);
+  --hljs-keyword: #e08a20;
+  --hljs-string: #3b6ea0;
+  --hljs-number: #cc8020;
+  --hljs-comment: #9894a0;
+  --hljs-title: #1e8a50;
+  --hljs-built_in: #d04040;
+  --hljs-literal: #e8a44c;
+  --hljs-class: #5c8cc0;
+  --hljs-function: #484458;
+  --hljs-params: #6c6878;
+  --hljs-attr: #18a860;
 }
 
 
 /* 沙漠主题代码高亮 */
 [data-theme="desert"] {
-    --hljs-text: #5c3d2e;
-    --hljs-bg: #f5e8c9;
-    --hljs-border: rgba(187, 150, 98, 0.3);
-    --hljs-keyword: #c4564a;        /* 日落红 */
-    --hljs-string: #8a9b52;         /* 仙人掌绿 */
-    --hljs-number: #d98236;         /* 主色陶土橙 */
-    --hljs-comment: #9e7e5f;        /* 胡桃木色 */
-    --hljs-title: #a87c52;          /* 胡桃木深色 */
-    --hljs-built_in: #bb9662;      /* 沙丘金 */
-    --hljs-literal: #e39e5d;        /* 日落橙 */
-    --hljs-class: #d98236;          /* 主色 */
-    --hljs-function: #bb9662;       /* 沙丘金 */
-    --hljs-params: #7d5c3f;         /* 深棕色 */
-    --hljs-attr: #8a9b52;           /* 沙漠绿 */
+    --hljs-text: #4a3020;
+    --hljs-bg: #f2e8d4;
+    --hljs-border: rgba(180, 156, 112, 0.3);
+    --hljs-keyword: #b84a3e;
+    --hljs-string: #7a8c46;
+    --hljs-number: #c4784a;
+    --hljs-comment: #8c6c50;
+    --hljs-title: #9c6e50;
+    --hljs-built_in: #b49c70;
+    --hljs-literal: #d0946e;
+    --hljs-class: #c4784a;
+    --hljs-function: #b49c70;
+    --hljs-params: #6b4c34;
+    --hljs-attr: #7a8c46;
 }
 
 :root {
     /* 水墨风基础变量 */
-    --ink-primary: #2c3e50;        /* 墨黑 */
-    --ink-secondary: #5d6d7e;      /* 灰墨 */
-    --ink-accent: #7f8c8d;          /* 淡墨 */
-    --ink-light: #ecf0f1;           /* 宣纸白 */
-    --ink-highlight: #3498db;       /* 青花点缀 */
-    --ink-danger: #e74c3c;         /* 朱砂红 */
-    --ink-success: #27ae60;        /* 竹青 */
-    --ink-warning: #f39c12;        /* 琥珀黄 */
+    --ink-primary: #2a3b4c;
+    --ink-secondary: #556678;
+    --ink-accent: #788898;
+    --ink-light: #e8ecf0;
+    --ink-highlight: #3a80b8;
+    --ink-danger: #dc5048;
+    --ink-success: #2a9058;
+    --ink-warning: #e09820;
     
-    /* 背景纹理 */
     --ink-bg-texture: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
                         linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
 }
 
+/* Sumi Brush - 水墨升级版：靛青墨 + 宣纸质感 */
 [data-theme="ink"] {
-    /* 基础三色 */
-    --bg-color: #f5f7fa;             /* 宣纸白背景 */
-    --text-color: #2c3e50;           /* 墨黑色文字 */
-    --border-color: #d5dbdb;         /* 淡墨灰边框 */
+    --bg-color: #f4f6f8;
+    --text-color: #1e2d3c;
+    --border-color: #d0d8e0;
     
-    /* 主色调 - 墨黑渐变 */
+    /* 主色调：靛青墨 (比原版更有层次) */
     --el-color-primary: var(--ink-primary);
-    --el-color-primary-light-3: #3d566e;
-    --el-color-primary-light-5: #4f6a85;
-    --el-color-primary-light-7: #6b839d;
+    --el-color-primary-light-3: #465a6e;
+    --el-color-primary-light-5: #5e748c;
+    --el-color-primary-light-7: #7e92a8;
     --el-color-primary-rgb: 44, 62, 80 !important;
     
-    /* 背景系统 */
     --el-bg-color: var(--bg-color) !important;
-    --el-bg-color-page: #eef2f6 !important;       /* 宣纸纹理背景 */
-    --el-tabs-bg-color: #eef2f6 !important;       /* 宣纸纹理背景 */
-    --el-bg-color-overlay: #ffffff !important;    /* 浮层背景 */
+    --el-bg-color-page: #eceff4 !important;
+    --el-tabs-bg-color: #eceff4 !important;
+    --el-bg-color-overlay: #ffffff !important;
     background-image: var(--ink-bg-texture);
     background-size: 20px 20px;
     
-    /* 文字系统 */
     --el-text-color-primary: var(--text-color) !important;
-    --el-text-color-regular: #5d6d7e !important;   /* 灰墨色 */
-    --el-text-color-secondary: #7f8c8d !important; /* 淡墨色 */
+    --el-text-color-regular: #4a5a6c !important;
+    --el-text-color-secondary: #6c7c8c !important;
     
-    /* 边框系统 */
     --el-border-color: var(--border-color) !important;
-    --el-border-color-light: #c5cdd3 !important;   /* 更淡墨色 */
-    --el-border-color-lighter: #e1e4e8 !important;
+    --el-border-color-light: #c0c8d4 !important;
+    --el-border-color-lighter: #dce2e8 !important;
     
-    /* 组件特定 */
-    --el-button-bg-color: #ffffff !important;      /* 宣纸白按钮 */
-    --el-input-bg-color: #ffffff !important;       /* 输入框背景 */
-    --el-menu-bg-color: #f5f7fa !important;       /* 菜单背景 */
-    --el-table-bg-color: #ffffff !important;       /* 表格背景 */
-    --el-tag-bg-color: rgba(44, 62, 80, 0.1) !important; /* 半透明标签 */
+    --el-button-bg-color: #ffffff !important;
+    --el-input-bg-color: #ffffff !important;
+    --el-menu-bg-color: #f4f6f8 !important;
+    --el-table-bg-color: #ffffff !important;
+    --el-tag-bg-color: rgba(44, 62, 80, 0.1) !important;
     
-    /* 状态颜色 */
-    --el-color-success: var(--ink-success) !important;     /* 竹青色 */
-    --el-color-warning: var(--ink-warning) !important;     /* 琥珀色 */
-    --el-color-danger: var(--ink-danger) !important;       /* 朱砂红 */
-    --el-color-info: var(--ink-highlight) !important;      /* 青花色 */
+    --el-color-success: var(--ink-success) !important;
+    --el-color-warning: var(--ink-warning) !important;
+    --el-color-danger: var(--ink-danger) !important;
+    --el-color-info: var(--ink-highlight) !important;
     
-    /* 阴影效果 */
     --el-box-shadow-light: 0 2px 8px rgba(44, 62, 80, 0.1) !important; 
     --card-shadow: 0 4px 12px rgba(44, 62, 80, 0.08); 
     
-    /* 输入框系统 */
     --el-input-text-color: var(--text-color);
-    --el-input-placeholder-color: #a6b1be;
+    --el-input-placeholder-color: #90a0b0;
     --el-input-hover-border-color: var(--el-color-primary-light-5);
     --el-input-focus-border-color: var(--el-color-primary);
-    --el-input-disabled-bg-color: #f0f3f7;
+    --el-input-disabled-bg-color: #eef0f4;
     
-    /* 代码块 */
     --code-bg: #ffffff;
-    --code-border: #e1e4e8;
+    --code-border: #dce2e8;
     
-    /* 水墨特色元素 */
     --ink-brush-stroke: linear-gradient(to right, 
         transparent 0%, 
         rgba(44, 62, 80, 0.2) 30%, 
@@ -813,22 +766,22 @@
         transparent 100%);
 }
 
-/* 配套代码高亮主题 */
+/* 配套代码高亮 - Sumi Brush */
 [data-theme="ink-wash"] {
     --hljs-text: var(--text-color);
     --hljs-bg: #ffffff;
-    --hljs-border: rgba(52, 152, 219, 0.1);
-    --hljs-keyword: #8e44ad;        /* 紫藤色 */
-    --hljs-string: var(--ink-danger); /* 朱砂红 */
-    --hljs-number: var(--ink-success); /* 竹青色 */
-    --hljs-comment: #95a5a6;        /* 烟灰色 */
-    --hljs-title: var(--ink-highlight); /* 青花色 */
-    --hljs-built_in: var(--ink-primary); /* 墨黑色 */
-    --hljs-literal: var(--ink-warning); /* 琥珀色 */
-    --hljs-class: #16a085;          /* 碧玉色 */
-    --hljs-function: #2980b9;       /* 靛青色 */
-    --hljs-params: #d35400;         /* 赭石色 */
-    --hljs-attr: #27ae60;           /* 竹青色 */
+    --hljs-border: rgba(58, 128, 184, 0.1);
+    --hljs-keyword: #7e44a0;
+    --hljs-string: var(--ink-danger);
+    --hljs-number: var(--ink-success);
+    --hljs-comment: #8898a8;
+    --hljs-title: var(--ink-highlight);
+    --hljs-built_in: var(--ink-primary);
+    --hljs-literal: var(--ink-warning);
+    --hljs-class: #18a078;
+    --hljs-function: #3078b8;
+    --hljs-params: #c84820;
+    --hljs-attr: #2a9058;
 }
 
 
@@ -914,11 +867,11 @@ body {
 .el-menu-item {
   background-color: var(--el-bg-color-page)!important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 13px;
 }
 
 .el-menu-item:hover {
   background: var(--el-menu-hover-bg-color) !important;
-  transform: translateX(4px);
 }
 
 /* 输入系统全局适配 */
@@ -2844,6 +2797,73 @@ body {
     font-weight: bold; /* 加粗 */
     color: var(--el-text-color);
 }
+
+/* 推荐参数建议区块 */
+.suggested-params {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 8px;
+}
+.suggested-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+}
+.suggested-header i {
+  color: var(--el-color-warning);
+  font-size: 14px;
+}
+.suggested-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.suggested-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 6px;
+  background: var(--el-bg-color);
+  transition: all 0.2s ease;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+.suggested-card:hover {
+  border-color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] .suggested-card:hover {
+  background: rgba(var(--el-color-primary-rgb, 64, 158, 255), 0.1);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.suggested-name {
+  color: var(--el-color-primary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.suggested-name i {
+  margin-right: 4px;
+  font-size: 10px;
+}
+.suggested-type {
+  font-size: 11px;
+  color: var(--el-text-color-placeholder);
+  padding: 1px 6px;
+  background: var(--el-fill-color);
+  border-radius: 3px;
+  font-family: monospace;
+}
+
 .message-actions {
   display: flex;
   justify-content: flex-end;
@@ -2947,7 +2967,7 @@ body {
 }
 
 .nav-text {
-  font-size: 14px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -3459,13 +3479,6 @@ body {
   .add-provider-right {
     padding-left: 0;
   }
-}
-
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  border-radius: 50%;
-  margin-left: 2px;
 }
 
 .spinner-rotate {
@@ -5062,16 +5075,10 @@ body {
 }
 
 .el-menu-item.is-active {
-  background: linear-gradient(90deg, var(--el-color-primary-light-9), var(--el-bg-color)) !important;
+  background: var(--el-color-primary-light-9) !important;
   color: var(--el-color-primary) !important;
-  font-weight: 600;
-  box-shadow: inset 3px 0 0 var(--el-color-primary); /* 左侧指示条 */
-}
-
-/* 暗黑模式适配 */
-[data-theme="dark"] .el-menu-item.is-active,
-[data-theme="midnight"] .el-menu-item.is-active {
-  background: rgba(var(--el-color-primary-rgb), 0.15) !important;
+  font-weight: 500;
+  border-radius: 8px !important;
 }
 
 /* 聊天容器背景微纹理 (可选，增加质感) */
@@ -10785,18 +10792,18 @@ code {
 }
 
 /* 动态交错延迟 (利用 nth-child 实现纯 CSS 瀑布流) */
-.provider-grid > div:nth-child(1), .guide-grid > div:nth-child(1), .plugins-grid > div:nth-child(1)(1) { animation-delay: 0.05s; }
-.provider-grid > div:nth-child(2), .guide-grid > div:nth-child(2), .plugins-grid > div:nth-child(2)(2) { animation-delay: 0.10s; }
-.provider-grid > div:nth-child(3), .guide-grid > div:nth-child(3), .plugins-grid > div:nth-child(3)(3) { animation-delay: 0.15s; }
-.provider-grid > div:nth-child(4), .guide-grid > div:nth-child(4), .plugins-grid > div:nth-child(4)(4) { animation-delay: 0.20s; }
-.provider-grid > div:nth-child(5), .guide-grid > div:nth-child(5), .plugins-grid > div:nth-child(5)(5) { animation-delay: 0.25s; }
-.provider-grid > div:nth-child(6), .guide-grid > div:nth-child(6), .plugins-grid > div:nth-child(6)(6) { animation-delay: 0.30s; }
-.provider-grid > div:nth-child(7), .guide-grid > div:nth-child(7), .plugins-grid > div:nth-child(7)(7) { animation-delay: 0.35s; }
-.provider-grid > div:nth-child(8), .guide-grid > div:nth-child(8), .plugins-grid > div:nth-child(8)(8) { animation-delay: 0.40s; }
-.provider-grid > div:nth-child(9), .guide-grid > div:nth-child(9), .plugins-grid > div:nth-child(9)(9) { animation-delay: 0.45s; }
-.provider-grid > div:nth-child(10),.guide-grid > div:nth-child(10),.plugins-grid > div:nth-child(10)(10){ animation-delay: 0.50s; }
-.provider-grid > div:nth-child(11),.guide-grid > div:nth-child(11),.plugins-grid > div:nth-child(11)(11){ animation-delay: 0.55s; }
-.provider-grid > div:nth-child(12),.guide-grid > div:nth-child(12),.plugins-grid > div:nth-child(12)(12){ animation-delay: 0.60s; }
+.provider-grid > div:nth-child(1), .guide-grid > div:nth-child(1), .plugins-grid > div:nth-child(1) { animation-delay: 0.05s; }
+.provider-grid > div:nth-child(2), .guide-grid > div:nth-child(2), .plugins-grid > div:nth-child(2) { animation-delay: 0.10s; }
+.provider-grid > div:nth-child(3), .guide-grid > div:nth-child(3), .plugins-grid > div:nth-child(3) { animation-delay: 0.15s; }
+.provider-grid > div:nth-child(4), .guide-grid > div:nth-child(4), .plugins-grid > div:nth-child(4) { animation-delay: 0.20s; }
+.provider-grid > div:nth-child(5), .guide-grid > div:nth-child(5), .plugins-grid > div:nth-child(5) { animation-delay: 0.25s; }
+.provider-grid > div:nth-child(6), .guide-grid > div:nth-child(6), .plugins-grid > div:nth-child(6) { animation-delay: 0.30s; }
+.provider-grid > div:nth-child(7), .guide-grid > div:nth-child(7), .plugins-grid > div:nth-child(7) { animation-delay: 0.35s; }
+.provider-grid > div:nth-child(8), .guide-grid > div:nth-child(8), .plugins-grid > div:nth-child(8) { animation-delay: 0.40s; }
+.provider-grid > div:nth-child(9), .guide-grid > div:nth-child(9), .plugins-grid > div:nth-child(9) { animation-delay: 0.45s; }
+.provider-grid > div:nth-child(10), .guide-grid > div:nth-child(10), .plugins-grid > div:nth-child(10) { animation-delay: 0.50s; }
+.provider-grid > div:nth-child(11), .guide-grid > div:nth-child(11), .plugins-grid > div:nth-child(11) { animation-delay: 0.55s; }
+.provider-grid > div:nth-child(12), .guide-grid > div:nth-child(12), .plugins-grid > div:nth-child(12) { animation-delay: 0.60s; }
 /* 超过12个的元素统一延迟，防止等待过久 */
 .provider-grid > div:nth-child(n+13), .guide-grid > div:nth-child(n+13), .plugins-grid > div:nth-child(n+13) { animation-delay: 0.65s; }
 
