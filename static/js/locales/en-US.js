@@ -750,6 +750,7 @@ window.lang_enUS = {
         'refreshWindow': 'Refresh the window',
         'closeWindow': 'Close the window',
         'enabledExpressions': 'Enable Expressions Control',
+        'enabledFineControl': 'Fine-grained Expression Control',
         'enabledMotions': 'Enable Motions Control',
         'srMode': 'SR Quality',
         'srOff': 'Off',
