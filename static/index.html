@@ -16122,6 +16122,15 @@ function updateElement(el, rawMarkdown, formatFn) {
                           <el-form-item :label="t('enabledExpressions')" class="form-item-align" label-position="left">
                             <el-switch
                               v-model="THAConfig.enabledEmotions"
+                              @change="val => { if (!val) THAConfig.enabledFineControl = false; autoSaveSettings(); }"
+                            ></el-switch>
+                          </el-form-item>
+
+                          <!-- 细粒度表情控制：表情控制的子选项，父开关关闭时不可用 -->
+                          <el-form-item :label="' ' + t('enabledFineControl')" class="form-item-align" label-position="left" style="padding-left: 20px;">
+                            <el-switch
+                              v-model="THAConfig.enabledFineControl"
+                              :disabled="!THAConfig.enabledEmotions"
                               @change="autoSaveSettings"
                             ></el-switch>
                           </el-form-item>

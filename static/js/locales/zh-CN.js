@@ -753,6 +753,7 @@ window.lang_zhCN = {
         'refreshWindow': '刷新窗口',
         'closeWindow': '关闭窗口',
         'enabledExpressions': '启用表情控制',
+        'enabledFineControl': '细粒度表情控制',
         'enabledMotions': '启用动作控制',
         'srMode': '超分画质',
         'srOff': '关闭',

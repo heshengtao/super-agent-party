@@ -964,6 +964,7 @@ let vue_data = {
     THAConfig: {
       name: 'default',
       enabledEmotions: false,
+      enabledFineControl: false,
       enabledMouthSync: false,
       srMode: 'cnnx2vl',
       selectedModelId: 'Lyra',

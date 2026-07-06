@@ -2423,18 +2423,59 @@ async def tools_change_messages(request: ChatRequest, settings: dict):
         from py.tha_engine import THA_MOTIONS
         motion_names = list(THA_MOTIONS.keys())
         motion_tags = [f"<{m}>" for m in motion_names]
-        THA_Expression_messages = (
+        # VRM 表情消费端按裸名精确匹配标签，无法识别带权重的形式（如 happy:0.6），
+        # 因此 VRM 表情启用时不注入权重/细粒度语法段
+        vrm_expressions_active = bool(settings.get('VRMConfig', {}).get('enabledExpressions'))
+        fine_control_enabled = bool(settings.get('THAConfig', {}).get('enabledFineControl'))
+
+        tha_prompt_base = (
             "\n\n你可以通过以下标签控制你的虚拟形象表情和动作：\n\n"
             "【表情标签】<happy> <angry> <sad> <neutral> <surprised> <relaxed>\n"
             f"【动作标签】{', '.join(motion_tags)}\n\n"
             "使用方法：将标签放在句子开头（如果有音色标签，就放到音色标签之后即可），例如：\n"
             "<angry>我真的生气了。<surprised>哇！<happy>我好开心。<nod>好的，没问题！\n\n"
+        )
+        tha_prompt_weights = (
+            "【表情强度与混合】表情标签支持强度控制和多表情混合，格式为 <表情:强度>，强度范围 0~1：\n"
+            "- <happy:0.3> 微微一笑（不必总是满强度，细腻的表情更自然）\n"
+            "- <happy:0.5><surprised:0.4> 惊喜交加（多个表情按权重混合）\n"
+            "- <sad:0.3><angry:0.2> 委屈中带一点不满\n"
+            "根据语境自行判断表情强度：轻描淡写用 0.2~0.4，明显情绪用 0.5~0.7，强烈情绪用 0.8~1.0。\n"
+            "不带强度的标签（如 <happy>）等价于强度 1.0。\n\n"
+        )
+        tha_prompt_fine_control = (
+            "【细粒度控制】当预设表情无法表达复杂情绪时，你可以直接控制五官部位（同样支持 :强度 与混合）：\n"
+            "- 眉毛：<eyebrow_troubled>八字眉(悲伤) <eyebrow_angry>怒眉 <eyebrow_raised>挑眉 "
+            "<eyebrow_happy>开心眉 <eyebrow_lowered>压低眉 <eyebrow_serious>严肃眉\n"
+            "- 眼睛：<eye_happy>笑眼(眼角弯弯，喜悦/揶揄时使用，建议0.3~0.6) <eye_surprised>睁大 "
+            "<eye_relaxed>放松闭眼 <eye_unimpressed>半睁眼(倦怠/冷淡，非笑意) "
+            "<eye_wink>双眼闭合 <wink_left>眨左眼 <wink_right>眨右眼 <eye_lower_eyelid>眯眼 <iris_small>瞳孔缩小\n"
+            "- 嘴巴：<mouth_smile>嘴角上扬 <mouth_frown>嘴角下垂 <mouth_open>张嘴(笑着张嘴需搭配mouth_smile) "
+            "<mouth_grin>咧嘴露齿 <mouth_eee>咧嘴eee <mouth_ooo>嘟嘴 <mouth_smirk>得意笑\n"
+            "细粒度控制可以组合出预设没有的复杂表情，例如：\n"
+            "- 强颜欢笑（悲伤但嘴角带笑）：<eyebrow_troubled:0.6><eye_relaxed:0.2><mouth_smile:0.4>\n"
+            "- 眯眼笑着调侃：<eye_happy:0.5><mouth_open:0.45><mouth_smile:0.7><eyebrow_raised:0.4>\n"
+            "- 得意地挑眉：<eyebrow_raised:0.7><mouth_smirk:0.6><eye_lower_eyelid:0.3>\n"
+            "- 无语扶额感：<eye_unimpressed:0.8><eyebrow_lowered:0.4><mouth_frown:0.2>\n"
+            "多数控制在 0.3~0.6 区间已具有充分表现力，接近 1.0 的取值仅用于极端情绪。\n"
+            "冲突的控制（如同时张嘴和嘟嘴）会被自动调和，可放心组合。\n\n"
+        )
+        tha_prompt_rules = (
             "规则：\n"
             "1. 表情标签会影响后续所有句子，直到切换为新的表情\n"
             "2. 动作标签是一次性的，只影响当前这句话\n"
-            "3. 表情和动作可以同时使用，例如：<happy><nod>太棒了！\n"
+            "3. 表情和动作可以同时使用，例如：<happy:0.6><nod>太棒了！\n"
             "4. 标签必须与句子在同一行，中间有换行符则不会生效\n\n"
         )
+
+        # 提示词分段装配：(启用条件, 片段)，新增语法段时在此追加
+        tha_prompt_sections = [
+            (True, tha_prompt_base),
+            (not vrm_expressions_active, tha_prompt_weights),
+            (fine_control_enabled and not vrm_expressions_active, tha_prompt_fine_control),
+            (True, tha_prompt_rules),
+        ]
+        THA_Expression_messages = "".join(part for enabled, part in tha_prompt_sections if enabled)
         content_append(request.messages, 'system', THA_Expression_messages)
 
     # TTS 规则（固定，原用 prepend 改为 append）
@@ -8272,17 +8313,57 @@ class TTSConnectionManager:
                 except: self.disconnect_overlay(conn)
 
     async def broadcast_emotion_to_tha(self, emotion: str):
-        """直接向所有 THA 姿态生成器发送表情/动作指令"""
+        """直接向所有 THA 姿态生成器发送表情/动作指令（单标签，兼容旧调用）"""
+        await self.broadcast_expressions_to_tha([emotion])
+
+    async def broadcast_expressions_to_tha(self, expressions: list):
+        """解析带权重的表情标签列表并混合广播；动作标签一次性触发。
+
+        支持格式："happy"（权重1.0）、"happy:0.3"（加权），
+        多个表情标签通过 compose_emotion_pose 加权混合，避免冲突。
+        """
         from py.tha_engine import THA_MOTIONS
+
+        # 去重快速路径：omniStreaming 每个流式增量都重发累积标签列表，
+        # 绝大多数增量标签无变化，一次列表比较（微秒级）即可跳过全部
+        # 解析/合成/广播工作，比无条件重算显著省时。
+        # 新列表以上次为前缀 → 只处理新增尾部（新情绪切换）；否则全量处理。
+        exps = [str(e) for e in expressions]
+        prev = getattr(self, '_last_tha_expressions', None)
+        if prev == exps:
+            return
+        if prev is not None and len(exps) > len(prev) and exps[:len(prev)] == prev:
+            batch = exps[len(prev):]
+        else:
+            batch = exps
+        self._last_tha_expressions = exps
+
+        weights = {}
+        motions = []
+        for exp in batch:
+            name, sep, w = exp.partition(':')
+            name = name.strip()
+            if name in THA_MOTIONS:
+                motions.append(name)
+            elif not sep or not w.strip():
+                # 裸标签（<happy>）= 切换语义：重置已累积的权重，
+                # 与旧版逐个 set_emotion 的"最后一个标签生效"行为一致
+                weights = {name: 1.0}
+            else:
+                # 带权重标签（<happy:0.3>）= 有意混合，累加
+                try:
+                    weights[name] = float(w)
+                except ValueError:
+                    continue
         conns = list(self.tha_connections)
         for conn in conns:
             try:
                 gen = getattr(conn, '_tha_gen', None)
                 if gen:
-                    if emotion in THA_MOTIONS:
-                        gen.set_motion(emotion)
-                    else:
-                        gen.set_emotion(emotion)
+                    if weights:
+                        gen.set_emotion_mix(weights)
+                    for m in motions:
+                        gen.set_motion(m)
             except:
                 self.disconnect_tha(conn)
 
@@ -8382,10 +8463,15 @@ async def tts_websocket_endpoint(websocket: WebSocket):
                         expressions = data_content.get("expressions",[])
                         if vts_instance.is_running:
                             for exp in expressions:
-                                asyncio.create_task(vts_instance.trigger_hotkey(exp))
-                        # THA 表情广播
-                        for exp in expressions:
-                            asyncio.create_task(tts_manager.broadcast_emotion_to_tha(exp))
+                                exp = str(exp)
+                                name, sep, w = exp.partition(':')
+                                # 仅当冒号后缀是数值权重（happy:0.5）时才剥离；
+                                # 含冒号的普通热键名（emote:wave）原样传递
+                                hotkey = name if (sep and re.fullmatch(r'\s*\d*\.?\d+\s*', w)) else exp
+                                asyncio.create_task(vts_instance.trigger_hotkey(hotkey))
+                        # THA 表情广播（整组交给 composer 加权混合）
+                        if expressions:
+                            asyncio.create_task(tts_manager.broadcast_expressions_to_tha(expressions))
 
                     # === 【新增】TTS 禁用时，流式文本(omniStreaming)携带的动作表情触发支持 ===
                     elif msg_type == "omniStreaming":
@@ -8393,10 +8479,15 @@ async def tts_websocket_endpoint(websocket: WebSocket):
                         expressions = data_content.get("expressions", [])
                         if vts_instance.is_running:
                             for exp in expressions:
-                                asyncio.create_task(vts_instance.trigger_hotkey(exp))
-                        # THA 表情广播
-                        for exp in expressions:
-                            asyncio.create_task(tts_manager.broadcast_emotion_to_tha(exp))
+                                exp = str(exp)
+                                name, sep, w = exp.partition(':')
+                                # 仅当冒号后缀是数值权重（happy:0.5）时才剥离；
+                                # 含冒号的普通热键名（emote:wave）原样传递
+                                hotkey = name if (sep and re.fullmatch(r'\s*\d*\.?\d+\s*', w)) else exp
+                                asyncio.create_task(vts_instance.trigger_hotkey(hotkey))
+                        # THA 表情广播（整组交给 composer 加权混合）
+                        if expressions:
+                            asyncio.create_task(tts_manager.broadcast_expressions_to_tha(expressions))
 
                     await tts_manager.broadcast_to_vrm(msg["text"])
                 except Exception as e:
@@ -11110,6 +11201,43 @@ async def set_tha_config(request: Request):
             settings["THAConfig"] = tha
             await save_settings(settings)
         return {"success": True}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "message": str(e)})
+
+
+@app.post("/tha_emotion")
+async def tha_emotion(request: Request):
+    """向所有已连接的 THA 挂件广播表情/动作（调试与外部集成用）。
+
+    支持三种格式：
+      {"emotion": "happy"}                          单表情
+      {"expressions": ["happy:0.3", "surprised:0.5"]} 权重字符串列表
+      {"emotions": {"happy": 0.3, "surprised": 0.5}}  权重字典
+    """
+    try:
+        payload = await request.json()
+        if "emotions" in payload:
+            emotions = payload["emotions"]
+            if not isinstance(emotions, dict) or not all(
+                    isinstance(v, (int, float)) for v in emotions.values()):
+                return JSONResponse(status_code=400, content={
+                    "success": False, "message": "emotions 必须是 {表情名: 数值权重} 字典"})
+            expressions = [f"{k}:{v}" for k, v in emotions.items()]
+        elif "expressions" in payload:
+            if not isinstance(payload["expressions"], list):
+                return JSONResponse(status_code=400, content={
+                    "success": False, "message": "expressions 必须是字符串列表"})
+            expressions = payload["expressions"]
+        elif "emotion" in payload:
+            if not isinstance(payload["emotion"], str):
+                return JSONResponse(status_code=400, content={
+                    "success": False, "message": "emotion 必须是字符串"})
+            expressions = [payload["emotion"]]
+        else:
+            return JSONResponse(status_code=400, content={
+                "success": False, "message": "需要 emotion / expressions / emotions 之一"})
+        await tts_manager.broadcast_expressions_to_tha(expressions)
+        return {"success": True, "expressions": expressions}
     except Exception as e:
         return JSONResponse(status_code=500, content={"success": False, "message": str(e)})
 

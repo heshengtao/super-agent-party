@@ -1456,9 +1456,15 @@ formatMessage(content, index) {
         if (isStandardHtmlName) {
           return match;
         } else {
-          return ''; 
+          return '';
         }
       });
+
+      // ============================================================
+      // 未闭合尾部标签持留：流式增量可能停在标签中间（如 "<mouth_smile:0."），
+      // 上方正则因缺少闭合 ">" 无法匹配，本帧先持留该片段，补全后再统一过滤
+      // ============================================================
+      formatted = this.holdbackUnclosedTrailingTag(formatted);
 
       // ============================================================
       // 处理 <think> 标签的 UI 转换
@@ -1742,6 +1748,30 @@ formatMessage(content, index) {
     // 新增方法：检测未闭合代码块
     hasUnclosedCodeBlock(parts) {
       return parts.some(p => p.type === 'code' && !p.closed);
+    },
+
+    /**
+     * 持留流式渲染中未闭合的尾部标签片段（如 "<mouth_smile:0."）
+     * 智能标签过滤（anyTagRegex）只能匹配带闭合 ">" 的完整标签，流式增量
+     * 恰好停在标签中间时，半截标签会以纯文本形式漏进气泡。
+     * 与 processMarkdownStreamForTTS 的积压缓冲思路一致：本帧先不渲染该片段，
+     * 待后续增量补全 ">" 后，交回智能标签过滤统一处理。
+     * 判定标准与智能标签过滤保持同一条正则：标准 HTML 标签名保留原样，
+     * 非标准名（表情/动作标签等）持留。
+     * @param {string} text 当前帧待渲染的完整累积文本
+     * @returns {string} 持留未闭合尾部标签后的文本
+     */
+    holdbackUnclosedTrailingTag(text) {
+      const lt = text.lastIndexOf('<');
+      if (lt === -1) return text;
+      const fragment = text.slice(lt + 1);
+      // 片段中已出现 ">"，说明尾部标签是闭合的，交给智能标签过滤处理
+      if (fragment.includes('>')) return text;
+      const tagName = fragment.split(/\s/)[0].replace(/^\//, '');
+      // 标准 HTML 名（或尚无法判断的孤立 "<"）保留原样，等待补全
+      if (tagName === '' || /^[a-zA-Z][a-zA-Z0-9-]*$/.test(tagName)) return text;
+      // 非标准标签名：本帧持留（截去该片段），下一增量重新渲染完整文本
+      return text.slice(0, lt);
     },
 
     splitCodeAndText(content) {

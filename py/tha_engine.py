@@ -62,6 +62,86 @@ EMOTION_POSE_MAP["relaxed"] = _make_pose(
 # neutral 清零
 EMOTION_POSE_MAP["neutral"] = np.zeros(45, dtype=np.float32)
 
+
+# ------------------------------------------------------------
+# 2a. 细粒度面部控制词表（LLM 可按部位独立控制，与整体情绪预设混用）
+# ------------------------------------------------------------
+# 格式：语义名 -> (维度索引, 增益)
+# 增益是实测校准值：部分参数对小数值就很敏感（如 eye_happy 0.4 已是明显弯月眼），
+# 通过增益把 LLM 的直觉数值（0~1 全量程）映射到实际好看的范围
+_FACE_CONTROL_INDICES: Dict[str, tuple] = {
+    # 眉毛（左右成对）
+    "eyebrow_troubled": ([0, 1], 1.0),    # 八字眉（悲伤/困扰）
+    "eyebrow_angry":    ([2, 3], 1.0),    # 怒眉
+    "eyebrow_lowered":  ([4, 5], 1.0),    # 压低眉
+    "eyebrow_raised":   ([6, 7], 1.0),    # 挑眉
+    "eyebrow_happy":    ([8, 9], 1.0),    # 开心眉
+    "eyebrow_serious":  ([10, 11], 1.0),  # 严肃眉
+    # 眼睛
+    "eye_wink":         ([12, 13], 1.0),  # 双眼闭合（普通）
+    "wink_left":        ([12], 1.0),      # 单闭左眼
+    "wink_right":       ([13], 1.0),      # 单闭右眼
+    "eye_happy":        ([14, 15], 0.55), # 笑眼（弯月眼）：敏感，0.4 已明显，增益压半
+    "eye_surprised":    ([16, 17], 1.0),  # 睁大（惊讶）
+    "eye_relaxed":      ([18, 19], 1.0),  # 放松闭眼
+    "eye_unimpressed":  ([20, 21], 1.0),  # 无语半睁眼
+    "eye_lower_eyelid": ([22, 23], 1.0),  # 下眼睑上抬（眯眼笑）
+    "iris_small":       ([24, 25], 1.0),  # 瞳孔缩小（惊吓）
+    # 嘴
+    "mouth_open":       ([26], 0.7),      # 张嘴 aaa：全开太夸张，增益 0.7
+    "mouth_grin":       ([27], 1.0),      # 咧嘴 iii（露齿横向咧开，视觉变化较小）
+    "mouth_eee":        ([29], 1.0),      # 咧嘴 eee
+    "mouth_ooo":        ([30], 1.0),      # 嘟嘴 ooo
+    "mouth_frown":      ([32, 33], 1.0),  # 嘴角下垂
+    "mouth_smile":      ([34, 35], 1.0),  # 嘴角上扬
+    "mouth_smirk":      ([36], 1.0),      # 撇嘴/得意笑
+}
+FACE_CONTROL_MAP: Dict[str, np.ndarray] = {
+    name: _make_pose(indices, gain) for name, (indices, gain) in _FACE_CONTROL_INDICES.items()
+}
+
+# 互斥组：组内参数加权和超过 1 时按比例压缩，保证物理上自洽
+# （嘴不能同时张成 aaa 又嘟成 ooo；一只眼的闭合总量不能超过全闭）
+_EXCLUSIVE_GROUPS = [
+    [26, 27, 28, 29, 30, 31],  # 嘴型 aaa/iii/uuu/eee/ooo/delta
+    [12, 14, 18],              # 左眼闭合类：wink / happy_wink / relaxed
+    [13, 15, 19],              # 右眼闭合类
+]
+
+
+def compose_emotion_pose(weights: Dict[str, float]) -> np.ndarray:
+    """按权重混合表情/细粒度控制，例如 {"happy": 0.2, "eyebrow_troubled": 0.6}。
+
+    1. 名字先查整体情绪预设（EMOTION_POSE_MAP），再查细粒度控制（FACE_CONTROL_MAP）
+    2. 逐参数加权累加后截断到 [0,1]
+    3. 互斥组内总量超 1 时按比例归一，合成不违和的表情
+    """
+    # 单个满权重预设直接原样返回（与 set_emotion 行为一致）。
+    # 预设是已调校过的固定组合（如 surprised 的 mouth_aaa=0.7 + mouth_ooo=0.7
+    # 组内和为 1.4），互斥组归一化只用于兜底自由组合，不应缩放预设本身
+    if len(weights) == 1:
+        (name, w), = weights.items()
+        base = EMOTION_POSE_MAP.get(name)
+        if base is not None and float(w) >= 1.0:
+            return base.copy()
+
+    pose = np.zeros(45, dtype=np.float32)
+    for name, w in weights.items():
+        base = EMOTION_POSE_MAP.get(name)
+        if base is None:
+            base = FACE_CONTROL_MAP.get(name)
+        if base is None:
+            continue
+        w = max(0.0, min(1.0, float(w)))
+        pose += base * w
+    pose = np.clip(pose, 0.0, 1.0)
+    for group in _EXCLUSIVE_GROUPS:
+        total = float(pose[group].sum())
+        if total > 1.0:
+            pose[group] /= total
+    return pose
+
+
 # ------------------------------------------------------------
 # 2b. 动作 -> 45维参数映射表（一次性动画，叠加在基础姿态之上）
 # ------------------------------------------------------------
@@ -151,6 +231,10 @@ class THAPoseGenerator:
         """设置情感，平滑过渡到对应姿态"""
         self._emotion_target = EMOTION_POSE_MAP.get(emotion_name, EMOTION_POSE_MAP["neutral"]).copy()
 
+    def set_emotion_mix(self, weights: Dict[str, float]):
+        """设置加权混合表情，如 {"happy": 0.2, "surprised": 0.4}，平滑过渡"""
+        self._emotion_target = compose_emotion_pose(weights)
+
     def set_mouth(self, amplitude: float):
         """设置口型幅度 0.0-1.0"""
         self._mouth_target = max(0.0, min(1.0, float(amplitude)))
@@ -212,7 +296,11 @@ class THAPoseGenerator:
         p[38] = idle_iy - mx * 0.95  # eye ← 水平鼠标
 
         # blinking — 闭眼状态下暂停眨眼
-        eyes_closed_by_emotion = max(self._emotion_target[18], self._emotion_target[19]) > 0.3
+        # 闭眼有三组通道：eye_wink(12/13)、eye_happy_wink(14/15)、eye_relaxed(18/19)，
+        # 任一侧闭合量超过阈值即暂停自动眨眼，避免眨眼叠加在已闭合的眼皮上产生抖动
+        closure_left = float(self._emotion_target[[12, 14, 18]].sum())
+        closure_right = float(self._emotion_target[[13, 15, 19]].sum())
+        eyes_closed_by_emotion = max(closure_left, closure_right) > 0.3
         if not eyes_closed_by_emotion:
             self.blink_timer += dt
             if self.blink_state == 0:
