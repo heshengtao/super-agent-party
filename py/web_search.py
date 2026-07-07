@@ -1018,3 +1018,82 @@ markdown_new_tool = {
         },
     },
 }
+
+# ========== You.com Search ==========
+
+async def youcom_search(query):
+    """
+    通过 You.com Search API 获取网络搜索结果。
+    API文档: https://you.com/specs/openapi_search_v1.yaml
+    """
+    settings = await load_settings()
+    def sync_search():
+        max_results = settings['webSearch'].get('youcom_max_results', 10)
+        api_key = settings['webSearch'].get('youcom_api_key', "")
+
+        if not api_key:
+            return "API key未配置，请检查设置中的 YDC_API_KEY"
+
+        url = "https://ydc-index.io/v1/search"
+        headers = {
+            'X-API-Key': api_key,
+            'Content-Type': 'application/json'
+        }
+        payload = json.dumps({
+            "query": query,
+            "count": max_results
+        })
+
+        try:
+            response = requests.post(url, headers=headers, data=payload, timeout=30)
+            if response.status_code == 200:
+                result_data = response.json()
+
+                formatted_results = []
+                web_results = result_data.get('results', {}).get('web', [])
+
+                for item in web_results:
+                    formatted_item = {
+                        'title': item.get('title', '无标题'),
+                        'link': item.get('url', ''),
+                        'displayUrl': item.get('url', ''),
+                        'snippet': item.get('description') or (item.get('snippets', [''])[0] if item.get('snippets') else '无内容摘要'),
+                        'siteName': item.get('title', '未知来源'),
+                    }
+                    formatted_results.append(formatted_item)
+
+                return json.dumps(formatted_results, indent=2, ensure_ascii=False)
+            elif response.status_code == 401:
+                return f"You.com API key无效或已过期，状态码：{response.status_code}"
+            elif response.status_code == 403:
+                return f"You.com API key缺少所需权限，状态码：{response.status_code}"
+            else:
+                return f"请求失败，状态码：{response.status_code}，响应内容：{response.text}"
+        except Exception as e:
+            print(f"You.com搜索错误: {str(e)}")
+            return ""
+
+    try:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, sync_search)
+    except Exception as e:
+        print(f"异步执行错误: {e}")
+        return ""
+
+youcom_tool = {
+    "type": "function",
+    "function": {
+        "name": "youcom_search",
+        "description": "通过You.com Search API获取网络信息，返回带有摘要和来源的搜索结果。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "需要搜索的关键词或自然语言查询语句。",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+}
