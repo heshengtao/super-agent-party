@@ -1120,6 +1120,7 @@ formatFileUrl(originalUrl) {
               "siliconflow": "https://api.siliconflow.cn/",
               "ZhipuAI":"https://open.bigmodel.cn/api/anthropic/",
               "moonshot":"https://api.moonshot.cn/anthropic/",
+              "minimax":"https://api.minimaxi.com/anthropic/",
               "aliyun": "https://dashscope.aliyuncs.com/apps/anthropic/",
               "modelscope":"https://api-inference.modelscope.cn/",
               "302.AI":"https://api.302.ai/cc/",
@@ -5666,6 +5667,7 @@ formatMessage(content, index) {
         "siliconflow": "https://api.siliconflow.cn/",
         "ZhipuAI":"https://open.bigmodel.cn/api/anthropic/",
         "moonshot":"https://api.moonshot.cn/anthropic/",
+        "minimax":"https://api.minimaxi.com/anthropic/",
         "aliyun": "https://dashscope.aliyuncs.com/apps/anthropic/",
         "modelscope":"https://api-inference.modelscope.cn/",
         "302.AI":"https://api.302.ai/cc/"
