@@ -41,18 +41,18 @@ class QQBotManager:
         self._startup_complete = threading.Event()
         self._ready_complete = threading.Event()
         self._startup_error = None
-        
+
     def start_bot(self, config):
         """在新线程中启动机器人"""
         if self.is_running:
             raise Exception("机器人已在运行")
-            
+
         self.config = config
         self._shutdown_event.clear()
         self._startup_complete.clear()
         self._ready_complete.clear()
         self._startup_error = None
-        
+
         self.bot_thread = threading.Thread(
             target=self._run_bot_thread,
             args=(config,),
@@ -60,42 +60,42 @@ class QQBotManager:
             name="QQBotThread"
         )
         self.bot_thread.start()
-        
+
         if not self._startup_complete.wait(timeout=30):
             self.stop_bot()
             raise Exception("机器人连接超时")
-            
+
         if self._startup_error:
             self.stop_bot()
             raise Exception(f"机器人启动失败: {self._startup_error}")
-        
+
         if not self._ready_complete.wait(timeout=30):
             self.stop_bot()
             raise Exception("机器人就绪超时，请检查网络连接和配置")
-            
+
         if not self.is_running:
             self.stop_bot()
             raise Exception("机器人未能正常运行")
-            
+
     def _run_bot_thread(self, config):
         """在线程中运行机器人"""
         self.loop = None
         bot_task = None
-        
+
         try:
             self.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self.loop)
-            
+
             self.bot_client = MyClient(intents=botpy.Intents(public_messages=True), is_sandbox=config.is_sandbox)
             self.bot_client.QQAgent = config.QQAgent
             self.bot_client.memoryLimit = config.memoryLimit
             self.bot_client.separators = config.separators if config.separators else []
             self.bot_client.reasoningVisible = config.reasoningVisible
             self.bot_client.quickRestart = config.quickRestart
-            
+
             self.bot_client._manager_ref = weakref.ref(self)
             self.bot_client._ready_callback = self._on_bot_ready
-            
+
             async def run_bot():
                 try:
                     logging.info("开始连接QQ机器人...")
@@ -108,18 +108,18 @@ class QQBotManager:
                     if not self._startup_complete.is_set():
                         self._startup_complete.set()
                     raise
-            
+
             bot_task = self.loop.create_task(run_bot())
-            
+
             async def delayed_connection_check():
                 await asyncio.sleep(2)
                 if not bot_task.done() and not self._startup_error:
                     self._startup_complete.set()
                     logging.info("机器人连接已建立，等待就绪...")
-            
+
             self.loop.create_task(delayed_connection_check())
             self.loop.run_until_complete(bot_task)
-            
+
         except Exception as e:
             logging.error(f"机器人线程异常: {e}")
             if not self._startup_error:
@@ -132,7 +132,7 @@ class QQBotManager:
             if bot_task and not bot_task.done():
                 bot_task.cancel()
             self._cleanup()
-    
+
     def _on_bot_ready(self):
         self.is_running = True
         self._ready_complete.set()
@@ -155,7 +155,7 @@ class QQBotManager:
         self.bot_client = None
         self.loop = None
         self._shutdown_event.set()
-            
+
     def stop_bot(self):
         if not self.is_running and not self.bot_thread:
             return
@@ -204,7 +204,7 @@ class MyClient(botpy.Client):
             await super().start(appid=appid, secret=secret)
         except Exception as e:
             raise Exception(f"认证失败或配置错误: {e}")
-    
+
     async def close(self):
         self._shutdown_requested = True
         self.is_running = False
@@ -212,7 +212,7 @@ class MyClient(botpy.Client):
         for task in self.active_tasks.values():
             task.cancel()
         await super().close()
-    
+
     async def on_ready(self):
         if self._shutdown_requested: return
         self.is_running = True
@@ -224,7 +224,7 @@ class MyClient(botpy.Client):
     async def on_c2c_message_create(self, message: C2CMessage):
         if not self.is_running: return
         c_id = message.author.user_openid
-        
+
         # 1. 检查并处理快捷指令（统一快捷指令，受系统设置全局开关控制）
         from py import shortcut_commands
         if await shortcut_commands.im_shortcuts_enabled():
@@ -268,7 +268,7 @@ class MyClient(botpy.Client):
         # 3. 创建新任务
         new_task = asyncio.create_task(self._process_c2c_logic(message))
         self.active_tasks[c_id] = new_task
-        
+
         try:
             await new_task
         except asyncio.CancelledError:
@@ -282,7 +282,7 @@ class MyClient(botpy.Client):
         settings = await load_settings()
         client = AsyncOpenAI(api_key="super-secret-key", base_url=f"http://127.0.0.1:{self.port}/v1")
         c_id = message.author.user_openid
-        
+
         # 初始化状态
         user_content = []
         image_url_list = []
@@ -307,7 +307,7 @@ class MyClient(botpy.Client):
                                     except: continue
                                 base64_data = base64.b64encode(image_data).decode("utf-8")
                                 user_content.append({"type": "image_url", "image_url": {"url": f"data:{content_type};base64,{base64_data}"}})
-        
+
         if user_content:
             user_content.append({"type": "text", "text": message.content + "图片链接：" + json.dumps(image_url_list)})
         else:
@@ -316,7 +316,7 @@ class MyClient(botpy.Client):
         if c_id not in self.memoryList: self.memoryList[c_id] = []
         if not hasattr(self, 'msg_seq_counters'): self.msg_seq_counters = {}
         self.msg_seq_counters.setdefault(c_id, 1)
-        
+
         if not hasattr(self, 'processing_states'): self.processing_states = {}
         self.processing_states[c_id] = {"text_buffer": "", "image_buffer": "", "image_cache": []}
         state = self.processing_states[c_id]
@@ -326,27 +326,27 @@ class MyClient(botpy.Client):
         try:
             asyncToolsID = self.asyncToolsID.get(c_id, [])
             fileLinks = self.fileLinks.get(c_id, [])
-            
+
             stream = await client.chat.completions.create(
                 model=self.QQAgent,
                 messages=self.memoryList[c_id],
                 stream=True,
-                extra_body={"asyncToolsID": asyncToolsID, "fileLinks": fileLinks, "is_app_bot": True}
+                extra_body={"asyncToolsID": asyncToolsID, "fileLinks": fileLinks, "is_app_bot": True, "platform": "qq"}
             )
-            
+
             full_response = []
             async for chunk in stream:
                 if chunk.choices:
                     delta = chunk.choices[0].delta
                     reasoning_content = getattr(delta, "reasoning_content", "")
                     content = delta.content or ""
-                    
+
                     # 处理 Tool 逻辑
                     chunk_dict = chunk.model_dump()
                     delta_dict = chunk_dict["choices"][0].get("delta", {})
                     async_tool_id = delta_dict.get("async_tool_id", "")
                     tool_link = delta_dict.get("tool_link", "")
-                    
+
                     if tool_link and settings["tools"]["toolMemorandum"]["enabled"]:
                         self.fileLinks.setdefault(c_id, []).append(tool_link)
                     if async_tool_id:
@@ -357,7 +357,7 @@ class MyClient(botpy.Client):
 
                     full_response.append(content)
                     display_content = reasoning_content if (reasoning_content and self.reasoningVisible) else content
-                    
+
                     state["text_buffer"] += display_content
                     state["image_buffer"] += display_content
 
@@ -374,14 +374,14 @@ class MyClient(botpy.Client):
                         state["text_buffer"] = buffer[split_pos:]
                         clean_text = self._clean_text(current_chunk)
                         if clean_text: await self._send_text_message(message, clean_text)
-            
+
             self._extract_images_to_cache(c_id)
             if state["text_buffer"]:
                 clean_text = self._clean_text(state["text_buffer"])
                 if clean_text: await self._send_text_message(message, clean_text)
-            
+
             await self._send_cached_images(message)
-            
+
             final_content = "".join(full_response)
             self.memoryList[c_id].append({"role": "assistant", "content": final_content})
             if self.memoryLimit > 0:
@@ -397,7 +397,7 @@ class MyClient(botpy.Client):
     async def on_group_at_message_create(self, message: GroupMessage):
         if not self.is_running: return
         g_id = message.group_openid
-        
+
         # 指令检查（统一快捷指令，受系统设置全局开关控制）
         from py import shortcut_commands
         if await shortcut_commands.im_shortcuts_enabled():
@@ -442,7 +442,7 @@ class MyClient(botpy.Client):
 
         new_task = asyncio.create_task(self._process_group_logic(message))
         self.active_tasks[g_id] = new_task
-        
+
         try:
             await new_task
         except asyncio.CancelledError:
@@ -456,7 +456,7 @@ class MyClient(botpy.Client):
         settings = await load_settings()
         client = AsyncOpenAI(api_key="super-secret-key", base_url=f"http://127.0.0.1:{self.port}/v1")
         g_id = message.group_openid
-        
+
         user_content = []
         image_url_list = []
         if message.attachments:
@@ -495,21 +495,21 @@ class MyClient(botpy.Client):
         try:
             asyncToolsID = self.asyncToolsID.get(g_id, [])
             fileLinks = self.fileLinks.get(g_id, [])
-            
+
             stream = await client.chat.completions.create(
                 model=self.QQAgent,
                 messages=self.memoryList[g_id],
                 stream=True,
-                extra_body={"asyncToolsID": asyncToolsID, "fileLinks": fileLinks, "is_app_bot": True}
+                extra_body={"asyncToolsID": asyncToolsID, "fileLinks": fileLinks, "is_app_bot": True, "platform": "qq"}
             )
-            
+
             full_response = []
             async for chunk in stream:
                 if chunk.choices:
                     delta = chunk.choices[0].delta
                     reasoning_content = getattr(delta, "reasoning_content", "")
                     content = delta.content or ""
-                    
+
                     chunk_dict = chunk.model_dump()
                     delta_dict = chunk_dict["choices"][0].get("delta", {})
                     async_tool_id = delta_dict.get("async_tool_id", "")
@@ -525,7 +525,7 @@ class MyClient(botpy.Client):
 
                     full_response.append(content)
                     display_content = reasoning_content if (reasoning_content and self.reasoningVisible) else content
-                    
+
                     state["text_buffer"] += display_content
                     state["image_buffer"] += display_content
 
@@ -546,9 +546,9 @@ class MyClient(botpy.Client):
             if state["text_buffer"]:
                 clean_text = self._clean_group_text(state["text_buffer"])
                 if clean_text: await self._send_group_text(message, clean_text, state)
-            
+
             await self._send_group_images(message, g_id)
-            
+
             final_content = "".join(full_response)
             self.memoryList[g_id].append({"role": "assistant", "content": final_content})
             if self.memoryLimit > 0:
