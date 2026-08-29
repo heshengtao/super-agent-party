@@ -1946,6 +1946,7 @@ let vue_data = {
       'siliconflow', 'aliyun', 'ZhipuAI', 'moonshot', 'minimax', 
        'mistral', 'lingyi','baichuan', 'qianfan', 'hunyuan', 'stepfun', 'Github', 
       'openrouter','together', 'fireworks', '360', 'Nvidia',
+      'orcarouter',
       'jina', 'gitee', 'perplexity', 'infini',
       'modelscope', 'tencent', 'MiMo','longcat'
     ],
@@ -1983,6 +1984,7 @@ let vue_data = {
       'stepfun': 'https://platform.stepfun.com/interface-key',
       'Github': 'https://github.com/settings/tokens',
       'openrouter': 'https://openrouter.ai/settings/keys',
+      'orcarouter': 'https://www.orcarouter.ai',
       'together': 'https://api.together.ai/settings/api-keys',
       'fireworks': 'https://fireworks.ai/account/api-keys',
       '360': 'https://ai.360.com/platform/keys',

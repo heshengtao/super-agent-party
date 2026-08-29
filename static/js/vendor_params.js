@@ -61,6 +61,9 @@ window.vendorSuggestedParams = {
     { name: 'reasoning', type: 'json', default: '{"effort":"high"}', desc: 'vendorParamDesc_openrouter_reasoning' },
     { name: 'top_k', type: 'integer', default: 0, desc: 'vendorParamDesc_openrouter_top_k' }
   ],
+  'orcarouter': [
+    { name: 'reasoning', type: 'json', default: '{"effort":"high"}', desc: 'vendorParamDesc_orcarouter_reasoning' }
+  ],
   'perplexity': [
     { name: 'search_domain_filter', type: 'json', default: '[]', desc: 'vendorParamDesc_perplexity_search_domain_filter' },
     { name: 'search_recency_filter', type: 'string', default: '', desc: 'vendorParamDesc_perplexity_search_recency_filter' }

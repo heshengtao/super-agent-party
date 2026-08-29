@@ -5598,6 +5598,7 @@ formatMessage(content, index) {
         'Github': 'https://models.github.ai/inference',
         'dmxapi': 'https://www.dmxapi.cn/v1',
         'openrouter': 'https://openrouter.ai/api/v1',
+        'orcarouter': 'https://api.orcarouter.ai/v1',
         'together': 'https://api.together.xyz/v1',
         'fireworks': 'https://api.fireworks.ai/inference/v1',
         '360': 'https://api.360.cn/v1',
