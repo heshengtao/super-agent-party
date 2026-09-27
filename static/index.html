@@ -11010,6 +11010,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                           <el-option label="Serper" value="serper" ></el-option>
                           <el-option label="Bochaai" value="bochaai" ></el-option>
                           <el-option label="You.com" value="youcom" ></el-option>
+                          <el-option label="Serply" value="serply" ></el-option>
                         </el-select>
                       </el-form-item>
                       <el-form-item :label="t('webCrawling')" class="form-item-align">
@@ -11443,6 +11444,50 @@ function updateElement(el, rawMarkdown, formatFn) {
                       <el-form-item :label="t('apiKey')" class="form-item-align" v-if="webSearchSettings.youcom_tier === 'api_key'">
                         <el-input
                           v-model="webSearchSettings.youcom_api_key"
+                          :placeholder="t('apiKeyPlaceholder')"
+                          show-password
+                          @input="autoSaveSettings"
+                          class="full-width-input"
+                        />
+                      </el-form-item>
+                    </div>
+                  </div>
+                  <!-- Serply 配置块 -->
+                  <div class="tool-item" v-show="webSearchSettings.engine === 'serply'">
+                    <div class="tool-header">
+                      <div class="header-left">
+                        <span>
+                          <el-icon>
+                            <i class="fa-solid fa-globe"></i>
+                          </el-icon>
+                          Serply
+                          <el-link
+                            type="primary"
+                            :underline="false"
+                            href="https://serply.io"
+                            target="_blank"
+                          >
+                            <el-icon class="mr-1">
+                              <i class="fa-solid fa-key"></i>
+                            </el-icon>{{ t('gotoAPI') }}
+                          </el-link>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="tool-content">
+                      <el-form-item :label="t('resultCount')" class="form-item-align">
+                        <el-slider
+                          v-model="webSearchSettings.serply_max_results"
+                          :min="1"
+                          :max="10"
+                          :step="1"
+                          show-input
+                          @input="autoSaveSettings"
+                        />
+                      </el-form-item>
+                      <el-form-item :label="t('apiKey')" class="form-item-align">
+                        <el-input
+                          v-model="webSearchSettings.serply_api_key"
                           :placeholder="t('apiKeyPlaceholder')"
                           show-password
                           @input="autoSaveSettings"

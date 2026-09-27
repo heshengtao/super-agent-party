@@ -20001,6 +20001,9 @@ closeTaskCenter() {
         case 'bochaai':
           if (!settings.bochaai_api_key?.trim()) errorMsg = this.t('pleaseConfigBochaaiApiKey');
           break;
+        case 'serply':
+          if (!settings.serply_api_key?.trim()) errorMsg = this.t('pleaseConfigSerplyApiKey');
+          break;
         // duckduckgo 无需强制配置，直接放行
       }
 

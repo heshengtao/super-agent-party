@@ -1235,3 +1235,91 @@ youcom_tool = {
         },
     },
 }
+
+async def serply_search(query):
+    """
+    通过 Serply Search API 获取 Google 网页搜索结果，需要 API Key。
+    API文档: https://serply.io/docs
+    """
+    settings = await load_settings()
+
+    # 读取用户代理设置
+    proxy_url = settings.get('systemSettings', {}).get('proxy', '')
+    proxies = None
+    if proxy_url:
+        proxies = {"http": proxy_url, "https": proxy_url}
+
+    def sync_search():
+        max_results = settings['webSearch'].get('serply_max_results')
+        if max_results is None:
+            max_results = 10
+        # Serply 单次最多返回 10 条结果
+        max_results = max(1, min(int(max_results), 10))
+        api_key = settings['webSearch'].get('serply_api_key', "")
+
+        if not api_key:
+            return "Serply API key 未配置，请在设置中填写 Serply API Key"
+
+        url = "https://api.serply.io/v1/search"
+        headers = {
+            'X-Api-Key': api_key,
+            'Accept': 'application/json',
+            'User-Agent': 'super-agent-party',
+        }
+        params = {"q": query, "num": max_results}
+
+        try:
+            response = requests.get(url, headers=headers, params=params, proxies=proxies, timeout=30)
+            if response.status_code == 200:
+                result_data = response.json()
+
+                formatted_results = []
+                for item in result_data.get('results', [])[:max_results]:
+                    link = item.get('link', '')
+                    if not link.startswith(('http://', 'https://')):
+                        continue
+                    formatted_item = {
+                        'title': item.get('title') or '无标题',
+                        'link': link,
+                        'displayUrl': link,
+                        'snippet': item.get('description') or '无内容摘要',
+                        'siteName': item.get('title') or '未知来源',
+                    }
+                    formatted_results.append(formatted_item)
+
+                return json.dumps(formatted_results, indent=2, ensure_ascii=False)
+            elif response.status_code == 401:
+                return f"Serply API key无效或已过期，状态码：{response.status_code}"
+            elif response.status_code == 402:
+                return f"Serply 账户额度不足，状态码：{response.status_code}"
+            else:
+                return f"请求失败，状态码：{response.status_code}，响应内容：{response.text}"
+        except Exception as e:
+            print(f"Serply搜索错误: {str(e)}")
+            return ""
+
+    try:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, sync_search)
+    except Exception as e:
+        print(f"异步执行错误: {e}")
+        return ""
+
+
+serply_tool = {
+    "type": "function",
+    "function": {
+        "name": "serply_search",
+        "description": "通过Serply搜索API获取Google网页搜索结果，返回带有摘要和来源的搜索结果。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "需要搜索的关键词或自然语言查询语句。",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+}

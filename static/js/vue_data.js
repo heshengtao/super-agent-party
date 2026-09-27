@@ -378,6 +378,8 @@ let vue_data = {
       youcom_max_results: 10,
       youcom_api_key: '',
       youcom_tier: 'free',
+      serply_max_results: 10,
+      serply_api_key: '',
       firecrawl_url: 'https://api.firecrawl.dev/v2', // 官方API或自部署地址
       firecrawl_api_key: '',
       firecrawl_mode: 'scrape', 
