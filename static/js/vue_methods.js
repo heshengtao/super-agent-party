@@ -5462,6 +5462,43 @@ formatMessage(content, index) {
       this.newProviderTemp = { vendor: '', url: '', apiKey: '', modelId: '' };
       await this.autoSaveSettings();
     },
+    getProviderModelChoices(provider) {
+      const models = provider.models || [];
+      const url = (provider.url || '').replace(/\/$/, '');
+      const direct = provider.vendor === 'minimax' &&
+        ['https://api.minimaxi.com/v1', 'https://api.minimax.io/v1'].includes(url);
+      const openrouter = provider.vendor === 'openrouter' && url === 'https://openrouter.ai/api/v1';
+      if (!direct && !openrouter) return models;
+
+      // Only replace ordinary text choices; saved IDs and media remain untouched.
+      const current = direct
+        ? ['MiniMax-M3.1-Flash', 'MiniMax-M3']
+        : ['minimax/minimax-m3.1-flash:free', 'minimax/minimax-m3'];
+      const isMiniMaxText = model => direct
+        ? /^(MiniMax-(M\d|Text|chat)|abab)/i.test(model)
+        : /^minimax\/(minimax-(m\d|text|chat)|abab)/i.test(model);
+      if (direct) return [...current, ...models.filter(model => !isMiniMaxText(model))];
+      const choices = [];
+      let inserted = false;
+      for (const model of models) {
+        if (isMiniMaxText(model)) {
+          if (!inserted) choices.push(...current);
+          inserted = true;
+        } else {
+          choices.push(model);
+        }
+      }
+      return choices;
+    },
+    getReasoningEfforts(config) {
+      const url = (config.base_url || '').replace(/\/$/, '');
+      if (config.model === 'MiniMax-M3.1-Flash' &&
+          ['https://api.minimaxi.com/v1', 'https://api.minimax.io/v1'].includes(url)) {
+        return this.reasoningEfforts.filter(effort =>
+          effort.value === null || ['low', 'medium', 'high', 'xhigh', 'max'].includes(effort.value));
+      }
+      return this.reasoningEfforts;
+    },
     async fetchModelsForProvider(provider) {
       try {
         console.log('Fetching models for provider:', provider.vendor);
@@ -5506,13 +5543,17 @@ formatMessage(content, index) {
         });
         if (!response.ok) throw new Error('Connection failed');
         const data = await response.json();
-        this.newProviderTemp.models = data.data || [];
+        this.newProviderTemp.models = this.getProviderModelChoices({
+          ...this.newProviderTemp, models: data.data || []
+        });
         this.newProviderTemp.connectionStatus = 'success';
         this.newProviderTemp.modelsLoading = false;
       } catch (error) {
         this.newProviderTemp.connectionStatus = 'failed';
         this.newProviderTemp.modelsLoading = false;
-        this.newProviderTemp.models = [];
+        this.newProviderTemp.models = this.getProviderModelChoices({
+          ...this.newProviderTemp, models: []
+        });
       }
     },
     // 找到原有的 removeProvider 方法，替换为以下代码
@@ -5641,7 +5682,9 @@ formatMessage(content, index) {
       if (value === 'llama.cpp') {
         this.newProviderTemp.apiKey = 'llamacpp' // 新增
       }
-      this.newProviderTemp.models = [];
+      this.newProviderTemp.models = this.getProviderModelChoices({
+        ...this.newProviderTemp, vendor: value, models: []
+      });
       this.newProviderTemp.modelsLoading = false;
       this.newProviderTemp.connectionStatus = null;
     },

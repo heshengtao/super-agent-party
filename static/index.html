@@ -6677,7 +6677,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                           @change="autoSaveSettings"
                         >
                           <el-option
-                            v-for="model in provider.models"
+                            v-for="model in getProviderModelChoices(provider)"
                             :key="model"
                             :label="model"
                             :value="model"
@@ -6972,7 +6972,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                           class="reasoning-effort-select"
                         >
                           <el-option
-                            v-for="effort in reasoningEfforts"
+                            v-for="effort in getReasoningEfforts(settings)"
                             :key="effort.value"
                             :label="t(effort.label)"
                             :value="effort.value"
@@ -7302,7 +7302,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                           class="reasoning-effort-select"
                         >
                           <el-option
-                            v-for="effort in reasoningEfforts"
+                            v-for="effort in getReasoningEfforts(fastSettings)"
                             :key="effort.value"
                             :label="t(effort.label)"
                             :value="effort.value"
@@ -7582,7 +7582,7 @@ function updateElement(el, rawMarkdown, formatFn) {
                           class="reasoning-effort-select"
                         >
                           <el-option
-                            v-for="effort in reasoningEfforts"
+                            v-for="effort in getReasoningEfforts(reasonerSettings)"
                             :key="effort.value"
                             :label="t(effort.label)"
                             :value="effort.value"

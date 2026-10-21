@@ -20,7 +20,7 @@ window.vendorSuggestedParams = {
   'hunyuan': [{ name: 'enable_thinking', type: 'boolean', default: true, desc: 'vendorParamDesc_hunyuan_enable_thinking' }],
   'baichuan': [{ name: 'enable_thinking', type: 'boolean', default: true, desc: 'vendorParamDesc_baichuan_enable_thinking' }],
   'stepfun': [{ name: 'enable_thinking', type: 'boolean', default: true, desc: 'vendorParamDesc_stepfun_enable_thinking' }],
-  'minimax': [{ name: 'enable_thinking', type: 'boolean', default: true, desc: 'vendorParamDesc_minimax_enable_thinking' }],
+  'minimax': [{ name: 'reasoning_effort', type: 'string', default: 'max', desc: 'reasoningEffort' }],
 
   'Ollama': [
     { name: 'repeat_penalty', type: 'float', default: 1.1, desc: 'vendorParamDesc_ollama_repeat_penalty' },
