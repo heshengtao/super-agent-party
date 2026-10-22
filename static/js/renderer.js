@@ -822,6 +822,9 @@ const app = Vue.createApp({
     }
     
     this.initWebSocket();
+    // 心境系统：首次拉取配置与状态（之后靠 WS 的 mood_update 推送）
+    this.loadMoodConfig();
+    this.loadMoodState();
     this.highlightCode();
     this.initDownloadButtons();
     

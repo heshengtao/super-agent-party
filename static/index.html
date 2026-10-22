@@ -12,6 +12,13 @@
       opacity: 1;
       transition: opacity 300ms ease-out;
     }
+    /* 心境系统：数值变化时滑块平滑过渡（软显示），避免"整点突然掉一截"的观感。
+       必须放在 head 里——写在 Vue 模板内部不会进入 DOM，transition 不会生效。
+       只在非拖拽状态生效（拖拽时动画会让手柄滞后 0.6s）。 */
+    .mood-slider--anim .el-slider__bar,
+    .mood-slider--anim .el-slider__button-wrapper {
+      transition: width .6s ease, left .6s ease;
+    }
   </style>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/styles.css">
@@ -6015,6 +6022,129 @@ function updateElement(el, rawMarkdown, formatFn) {
                   </el-tab-pane>
 
                 </el-tabs>
+              </div>
+              <!-- 心境系统（角色自己的心情，不区分用户） -->
+              <div v-show="subMenu === 'mood'" class="page">
+                <el-form :model="moodSettings" class="settings-form" label-position="top">
+                  <div class="tool-item">
+                    <div class="tool-header">
+                      <div class="header-left">
+                        <span>
+                          <el-icon><i class="fa-solid fa-cloud-sun"></i></el-icon>
+                          心境系统（角色自己的心情）
+                        </span>
+                      </div>
+                      <el-switch v-model="moodSettings.enabled" @change="onMoodEnabledChange"/>
+                    </div>
+
+                    <div class="tool-content" v-if="moodSettings.enabled">
+                      <el-alert type="info" :closable="false" class="mb-4">
+                        <template #default>
+                          <div class="alert-content">
+                            聊太多会累（精力值 E），想太深会烦（耐心值 T），被骂了会难过（心情值 V）。
+                            三条轴按时间自然流动，对话带来的变化会立即生效；数值只给界面看，模型只会收到一句"该怎么说话"的定句。
+                          </div>
+                        </template>
+                      </el-alert>
+
+                      <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                        <span style="min-width:150px;">当前心境：{{ moodAxisLabel(moodSnapshot.axis) }}</span>
+                        <span style="font-size:12px; opacity:.7;">
+                          节拍 {{ moodSettings.tickMinutes }} 分钟 · 精力上限 {{ moodSnapshot.ceiling }}
+                          <template v-if="moodSnapshot.manual_lock_until > 0"> · 手动调整中</template>
+                        </span>
+                      </div>
+
+                      <!-- 心情值 V -->
+                      <el-form-item label="心情值 V —— 管「从低落到愉快」：影响语气暖度与是否主动搭话（刻度 60 = 中性，事件过去会回落到这里）">
+                        <div style="display:flex; align-items:center; gap:12px; width:100%;">
+                          <el-slider
+                            :class="{ 'mood-slider': true, 'mood-slider--anim': !moodDragging }"
+                            style="flex:1;"
+                            v-model="moodSnapshot.V"
+                            :min="0" :max="100" :step="1"
+                            :marks="{ '60': '中性' }"
+                            @input="val => onMoodPreview('V', val)"
+                            @change="val => setMoodAxis('V', val)"
+                          />
+                          <span style="min-width:40px; text-align:right;">{{ Math.round(moodSnapshot.V) }}</span>
+                        </div>
+                      </el-form-item>
+
+                      <!-- 精力值 E -->
+                      <el-form-item :label="`精力值 E —— 管「从困倦到精神」：影响回复长短与主动性；受当前时段上限压制（当前上限 ${moodSnapshot.ceiling}，刻度线即上限，休息后回满）`">
+                        <div style="display:flex; align-items:center; gap:12px; width:100%;">
+                          <el-slider
+                            :class="{ 'mood-slider': true, 'mood-slider--anim': !moodDragging }"
+                            style="flex:1;"
+                            v-model="moodSnapshot.E"
+                            :min="0" :max="moodSnapshot.ceiling" :step="1"
+                            :marks="moodSliderMarks"
+                            @input="val => onMoodPreview('E', val)"
+                            @change="val => setMoodAxis('E', val)"
+                          />
+                          <span style="min-width:40px; text-align:right;">{{ Math.round(moodSnapshot.E) }}</span>
+                        </div>
+                      </el-form-item>
+
+                      <!-- 耐心值 T -->
+                      <el-form-item label="耐心值 T —— 管「从平静到烦躁」：影响客套程度与容忍度；被烧脑任务消耗，静置后回满（地板 20）">
+                        <div style="display:flex; align-items:center; gap:12px; width:100%;">
+                          <el-slider
+                            style="flex:1;"
+                            :class="{ 'mood-slider': true, 'mood-slider--anim': !moodDragging }"
+                            v-model="moodSnapshot.T"
+                            :min="20" :max="100" :step="1"
+                            @input="val => onMoodPreview('T', val)"
+                            @change="val => setMoodAxis('T', val)"
+                          />
+                          <span style="min-width:40px; text-align:right;">{{ Math.round(moodSnapshot.T) }}</span>
+                        </div>
+                      </el-form-item>
+
+                      <el-form-item label="失态许可 —— 烦躁时是否允许越过分寸（辱骂/威胁/歧视等底线始终禁止）">
+                        <el-switch v-model="moodSettings.allowLapse" @change="autoSaveSettings"/>
+                        <span style="font-size:12px; opacity:.7; margin-left:8px;">
+                          {{ moodSettings.allowLapse ? '允许冷嘲、顶撞，甚至过火' : '只表现为话少、直给，不攻击对方' }}
+                        </span>
+                      </el-form-item>
+
+                      <el-form-item label="时间节拍 —— 心境按这个节拍自然流动（对话带来的变化会立即生效）">
+                        <el-select v-model="moodSettings.tickMinutes" style="width:160px;" @change="autoSaveSettings">
+                          <el-option :value="1" label="1 分钟"/>
+                          <el-option :value="5" label="5 分钟（推荐）"/>
+                          <el-option :value="10" label="10 分钟"/>
+                          <el-option :value="15" label="15 分钟"/>
+                          <el-option :value="30" label="30 分钟"/>
+                        </el-select>
+                      </el-form-item>
+
+                      <el-form-item label="最近变化（为什么变了）">
+                        <div style="width:100%; font-size:12px; opacity:.8;">
+                          <div v-if="!moodSnapshot.recent_deltas || moodSnapshot.recent_deltas.length === 0">
+                            暂无变化记录
+                          </div>
+                          <div v-for="(d, i) in (moodSnapshot.recent_deltas || []).slice().reverse()" :key="i" style="margin-bottom:2px;">
+                            {{ d.reason || '变化' }}：
+                            心情 {{ d.dV > 0 ? '+' : '' }}{{ d.dV }}
+                            · 精力 {{ d.dE > 0 ? '+' : '' }}{{ d.dE }}
+                            · 耐心 {{ d.dT > 0 ? '+' : '' }}{{ d.dT }}
+                            <span v-if="d.manual">（手动）</span>
+                          </div>
+                        </div>
+                      </el-form-item>
+
+                      <div style="display:flex; gap:10px;">
+                        <el-button @click="loadMoodState">刷新</el-button>
+                        <el-button type="warning" @click="resetMoodState">重置为基线</el-button>
+                      </div>
+                    </div>
+
+                    <div class="tool-content" v-else>
+                      <el-empty description="心境系统未开启"/>
+                    </div>
+                  </div>
+                </el-form>
               </div>
               <!-- 日记系统界面 -->
               <div v-show="subMenu === 'diary'" class="page mcp-container">
