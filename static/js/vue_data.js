@@ -1386,6 +1386,7 @@ let vue_data = {
         // { id: 'mind', title: 'CharacterMind', icon: 'fa-solid fa-heart' },
         { id: 'sticker', title: 'sticker/image', icon: 'fa-solid fa-face-smile' },
         { id: 'affection', title: 'affectionSystem', icon: 'fa-solid fa-heart' },
+        { id: 'mood', title: 'moodSystem', icon: 'fa-solid fa-cloud-sun' },
         { id: 'diary', title: 'DiarySystem', icon: 'fa-solid fa-book' },
         { id: 'vision', title: 'CharacterVision', icon: 'fa-solid fa-eye'},
         { id: 'behavior', title: 'CharacterBehavior', icon: 'fa-solid fa-person-running' },
@@ -2261,6 +2262,21 @@ main();`,
       ],
       prompt: "请根据用户的发言态度、情感色彩以及你的角色设定，动态管理以下羁绊数值：\n1. love（好感度）：代表你对用户的喜爱与亲密度。如果用户表达善意、关心或与你互动愉快，请增加（+1至+5）；如果用户冷漠、辱骂或做出让你反感的行为，请降低（-1至-5）。该数值最大为50，最小为-50。\n2. familiarity（熟悉度）：代表你与用户的了解程度。随着交流次数的增多和彼此信息的分享，该数值应缓慢稳步上升（每次+1至+2），通常不会下降。该数值最大为100，最小为0。\n\n*特殊说明：如果你在上方没有看到“目前的属性数值”，说明这是你与该用户的首次互动。请直接根据用户当前第一句话的语气和态度，自主决定一个合理的初始值（例如 0 到 10 之间），直接输出标签即可。聊天时请尽量按照羁绊数值来变换语气、内容、风格等*"
     },
+    // 心境系统（角色自己的心情，不区分用户）
+    moodSettings: {
+      enabled: false,
+      tickMinutes: 5,
+      allowLapse: false,
+      manualLockMinutes: 30,
+      baseline: { V: 60, E: 60, T: 60 }
+    },
+    moodSnapshot: {
+      V: 60, E: 60, T: 60, baselineV: 60, ceiling: 100, axis: null,
+      turns: 0, updated_at: 0, manual_lock_until: 0, recent_deltas: []
+    },
+    moodConfig: { ceilingTable: [], ceiling: 100, tFloor: 20 },
+    moodSliderMarks: {},
+    moodDragging: false,
     // 羁绊系统 UI 状态
     activeAffectionTab: 'config', // 控制当前在哪个 Tab
     affectionRawData: {},         // 存放后端返回的原始 JSON ( {"小包": {love:1}, "张三": {love:5}} )

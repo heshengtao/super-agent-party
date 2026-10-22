@@ -2142,6 +2142,7 @@ formatMessage(content, index) {
           this.wslSettings = data.data.wslSettings || this.wslSettings;
           this.visionControlSettings = data.data.visionControlSettings || this.visionControlSettings;
           this.loveSettings = data.data.loveSettings || this.loveSettings;
+          this.moodSettings = data.data.moodSettings || this.moodSettings;
           this.diarySettings = data.data.diarySettings || this.diarySettings;
           this.ccSettings = data.data.ccSettings || this.ccSettings;
           this.qcSettings = data.data.qcSettings || this.qcSettings;
@@ -2228,6 +2229,7 @@ formatMessage(content, index) {
           this.wslSettings = data.data.wslSettings || this.wslSettings;
           this.visionControlSettings = data.data.visionControlSettings || this.visionControlSettings;
           this.loveSettings = data.data.loveSettings || this.loveSettings;
+          this.moodSettings = data.data.moodSettings || this.moodSettings;
           this.diarySettings = data.data.diarySettings || this.diarySettings;
           this.ccSettings = data.data.ccSettings || this.ccSettings;
           this.qcSettings = data.data.qcSettings || this.qcSettings;
@@ -2367,6 +2369,13 @@ formatMessage(content, index) {
           this.userInput = data.data.text;
         }
         // 更新或添加提示词
+        else if (data.type === 'mood_update') {
+            // 心境时钟推送（真实数值只给 UI，不进 prompt）
+            if (data.data && typeof data.data === 'object') {
+              this.moodSnapshot = Object.assign({}, this.moodSnapshot, data.data);
+              this.moodSliderMarks = { [String(Math.round(this.moodSnapshot.ceiling))]: '上限' };
+            }
+        }
         else if (data.type === 'update_system_prompt') {
             const id = data.data.id;
             const text = data.data.text;
@@ -4793,6 +4802,7 @@ formatMessage(content, index) {
           acpSettings: this.acpSettings,
           visionControlSettings: this.visionControlSettings,
           loveSettings: this.loveSettings,
+          moodSettings: this.moodSettings,
           diarySettings: this.diarySettings,
           ccSettings: this.ccSettings,
           qcSettings: this.qcSettings,
@@ -20332,6 +20342,84 @@ closeTaskCenter() {
     if (tabName === 'data') {
       this.fetchAffectionData();
     }
+  },
+
+  // ==================== 心境系统（角色的心情，不区分用户） ====================
+  async loadMoodState() {
+    try {
+      const res = await fetch('/api/mood/state');
+      const json = await res.json();
+      if (json.success && json.data) {
+        this.moodSnapshot = Object.assign({}, this.moodSnapshot, json.data);
+        this.moodSliderMarks = { [String(Math.round(this.moodSnapshot.ceiling))]: '上限' };
+      }
+    } catch (e) { console.warn('读取心境状态失败', e); }
+  },
+
+  async loadMoodConfig() {
+    try {
+      const res = await fetch('/api/mood/config');
+      const json = await res.json();
+      if (json.success && json.data) {
+        this.moodConfig = json.data;
+        if (json.data.settings) {
+          this.moodSettings = Object.assign({}, this.moodSettings, json.data.settings);
+        }
+      }
+    } catch (e) { console.warn('读取心境配置失败', e); }
+  },
+
+  // 拖动时只更新本地显示，松手才落库（避免每移动一像素就发请求）
+  onMoodPreview(axis, value) {
+    this.moodDragging = true;      // 拖拽中关闭过渡，避免手柄滞后
+    this.moodSnapshot[axis] = value;
+  },
+
+  async setMoodAxis(axis, value) {
+    if (!this.moodSettings.enabled) { this.moodDragging = false; return; }
+    try {
+      const lockMin = (this.moodSettings.manualLockMinutes === undefined || this.moodSettings.manualLockMinutes === null)
+          ? 30 : Number(this.moodSettings.manualLockMinutes);
+        const body = { freezeMinutes: lockMin };
+      body[axis] = value;
+      const res = await fetch('/api/mood/set', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        this.moodSnapshot = Object.assign({}, this.moodSnapshot, json.data);
+        showNotification('已手动调整并冻结自动变化 ' + (body.freezeMinutes) + ' 分钟', 'success');
+      }
+    } catch (e) { console.warn('设置心境失败', e); }
+    finally { this.moodDragging = false; }   // 成功/失败/未开启都必须复位，否则软显示永久失效
+  },
+
+  async resetMoodState() {
+    try {
+      const res = await fetch('/api/mood/reset', { method: 'POST' });
+      const json = await res.json();
+      if (json.success && json.data) {
+        this.moodSnapshot = Object.assign({}, this.moodSnapshot, json.data);
+        showNotification('心境已重置为基线', 'success');
+      }
+    } catch (e) { console.warn('重置心境失败', e); }
+  },
+
+  onMoodEnabledChange() {
+    this.autoSaveSettings();
+    if (this.moodSettings.enabled) this.loadMoodState();
+  },
+
+  moodAxisLabel(axis) {
+    const map = {
+      V_low: '心情低落', V_high: '心情不错',
+      E_low: '有些疲惫', E_high: '很有精神',
+      T_low: '不太耐烦', T_high: '很从容',
+      ET_low: '又累又烦'
+    };
+    return map[axis] || '平稳';
   },
 
   async fetchAffectionData() {

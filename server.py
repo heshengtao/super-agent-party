@@ -99,7 +99,7 @@ from py.task_tools import (
 )
 from py.load_files import get_files_content, file_tool, image_tool
 from py.diary_query_tool import diary_query_tool, diary_books_tool, handle_query_diary, handle_list_diary_books
-from py.diary_chat_integration import append_to_chat_buffer, update_buffer_identity, get_chat_buffer
+from py.diary_chat_integration import append_to_chat_buffer, update_buffer_identity, get_chat_buffer, resolve_character_name
 from py.diary_system import get_recent_diary_entries, DEFAULT_BOOK_ID as DIARY_DEFAULT_BOOK
 
 import shortuuid
@@ -856,6 +856,16 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"日记引擎启动异常: {e}")
         diary_engine_task = None
+
+    # --- [心境时钟初始化] ---
+    # 节拍只负责时间流逝；对话事件由 chat 路径直接 push_turn，略过节拍。
+    try:
+        from py.mood_clock import mood_clock
+        mood_clock_task = asyncio.create_task(mood_clock.start(lambda: globals().get('settings') or {}))
+        print("[Mood] 心境时钟已启动")
+    except Exception as e:
+        print(f"心境时钟启动异常: {e}")
+        mood_clock_task = None
 
     # --- [日志系统初始化] ---
 
@@ -1720,6 +1730,27 @@ class ChatRequest(BaseModel):
     conversation_id: Optional[Union[str, int, float]] = None
     group_id: Optional[Union[str, int, float]] = None
     user_message_id: Optional[Union[str, int, float]] = None
+
+
+# ============================================================
+# 渠道能力判定（统一 is_app_bot / platform 的语义，避免各处判断不一致）
+#
+# 约定：
+#   - 外部渠道（IM 机器人，is_app_bot=True）：不注入"桌面端专属能力"
+#     （虚拟形象表情动作、羁绊数值、TTS 标签规则），也**不解析**羁绊数值标签；
+#     但记忆能力（角色日记、长期记忆）照常可用 —— 同一个角色在不同渠道共享记忆。
+#   - 内部日记调用（platform="diary"）：日记引擎 / 闲聊总结对自身的调用，
+#     不再注入日记与记忆，避免"总结时再读一遍旧日记"的自我引用。
+# ============================================================
+def is_external_channel(request) -> bool:
+    """是否是外部渠道（IM 机器人）会话。"""
+    return bool(getattr(request, 'is_app_bot', False))
+
+
+def is_internal_diary_call(request) -> bool:
+    """是否是日记引擎 / 闲聊总结对自身的内部调用。"""
+    return (getattr(request, 'platform', '') or '') == 'diary'
+
 
 GROUP_MEMORY_TYPES = {"fact", "decision", "preference", "todo", "constraint", "glossary"}
 GROUP_MEMORY_DONE_HINTS = ("完成", "已完成", "done", "resolved", "fixed", "closed")
@@ -2601,9 +2632,10 @@ async def tools_change_messages(request: ChatRequest, settings: dict):
         content_append(request.messages, 'system', THA_Expression_messages)
 
     # TTS 规则（固定，原用 prepend 改为 append）
+    # 外部渠道（IM 机器人）不注入：那边是纯文本消息，<silence>/<音色名> 只会变成乱码。
     newttsList = []
     Narrator_label = "Narrator"
-    if settings['ttsSettings']['enabled'] and not request.is_sub_agent:
+    if settings['ttsSettings']['enabled'] and not request.is_sub_agent and not is_external_channel(request):
         # 获取角色名称
         cur_memory_tts = None
         if settings["memorySettings"]["is_memory"] and settings["memorySettings"]["selectedMemory"]:
@@ -3063,7 +3095,7 @@ Assistant: 表格如下：
 格式 **必须** 严格遵守以下示例（将“发言者的真实名字”替换为你识别出的真实名字，且必须包含所有维度）：
 {tag_example}
 
-注意：系统会自动隐藏<>包裹的文本，请直接输出标签，绝对不要在标签前后加任何解释、加粗或Markdown代码块包裹！
+注意：这些数值仅供你内部参考，不要在回复里说出具体数字；系统会自动隐藏<>包裹的文本，请直接输出标签，绝对不要在标签前后加任何解释、加粗或Markdown代码块包裹！
 """
         content_append(request.messages, 'system', affection_message)
 
@@ -3151,6 +3183,28 @@ Assistant: 表格如下：
         else:
             content_append(request.messages, 'system',
                 "\n\n【本地应用控制已启用】当前没有已连接的应用。先在 GUI 中扫描并连接应用。")
+
+    # 6. 心境（**放在最后**：动态区的尾巴，模型注意力最强；且不与好感度段交错）
+    # 语义：**先无条件摘掉带标记的旧块，再按开关决定是否追加新块**。
+    # 这样"关掉开关"时也绝不会把上一轮的残留留在 system 里（审核员第三轮 P3-1）。
+    if not request.is_sub_agent and not is_internal_diary_call(request):
+        try:
+            from py.state_render import render_for_state, strip_block
+            target = None
+            for msg in request.messages:
+                if isinstance(msg, dict) and msg.get('role') == 'system':
+                    msg['content'] = strip_block(msg.get('content') or '', settings)
+                    if target is None:
+                        target = msg
+            mood_block = render_for_state(settings)
+            if mood_block:
+                if target is None:
+                    target = {'role': 'system', 'content': ''}
+                    request.messages.insert(0, target)
+                prefix = target.get('content') or ''
+                target['content'] = (prefix + ("\n" if prefix.strip() else "")) + mood_block
+        except Exception as e:
+            print(f"[Mood] 注入心境失败: {e}")
 
     print(f"系统提示：{request.messages[0]['content']}")
     return request
@@ -3969,8 +4023,9 @@ async def generate_stream_response(client, reasoner_client, request: ChatRequest
                 content_append(request.messages, 'system', "\n\n" + settings["memorySettings"]["genericSystemPrompt"] + "\n\n")
 
         # ========== 日记集成：将近期日记注入对话上下文 ==========
+        # 内部日记调用（platform="diary"）不注入，避免"总结对话时又读一遍旧日记"的自我引用。
         diary_cfg = (settings.get("diarySettings", {}) or {}).get("chatIntegration", {}) or {}
-        if diary_cfg.get("enabled", False) and not request.is_sub_agent:
+        if diary_cfg.get("enabled", False) and not request.is_sub_agent and not is_internal_diary_call(request):
             try:
                 ms = (settings or {}).get("memorySettings", {}) or {}
                 diary_book_id = DIARY_DEFAULT_BOOK
@@ -4016,7 +4071,7 @@ async def generate_stream_response(client, reasoner_client, request: ChatRequest
             dynamic_user_context += f"\n\n[世界设定]\n{lore_content}"
 
         # 记忆检索（动态，基于当前用户输入）
-        if m0 and not request.is_sub_agent:
+        if m0 and not request.is_sub_agent and not is_internal_diary_call(request):
             memoryLimit = settings["memorySettings"]["memoryLimit"]
             try:
                 relevant_memories = await asyncio.to_thread(
@@ -4046,7 +4101,7 @@ async def generate_stream_response(client, reasoner_client, request: ChatRequest
                 ms = (settings or {}).get("memorySettings", {}) or {}
                 buffer_key = ms.get("selectedMemory") or DIARY_DEFAULT_BOOK
                 update_buffer_identity(buffer_key, book_id=buffer_key,
-                                       character_name=(ms.get("userName") or ""))
+                                       character_name=resolve_character_name(settings))
                 last_msg = request.messages[-1] if request.messages else None
                 if last_msg and last_msg.get("role") == "user":
                     append_to_chat_buffer(buffer_key, "user", _extract_text_content(last_msg.get("content", "")))
@@ -5848,7 +5903,15 @@ async def generate_stream_response(client, reasoner_client, request: ChatRequest
                         })
                     except Exception:
                         pass
-                if settings.get('loveSettings', {}).get('enabled', False) and not request.is_sub_agent:
+                # ========== 心境：把这一轮的事件投递给时钟（立即生效，不等节拍） ==========
+                if (settings.get('moodSettings', {}) or {}).get('enabled') \
+                        and not request.is_sub_agent and not is_internal_diary_call(request):
+                    try:
+                        from py.mood_clock import mood_clock
+                        await mood_clock.push_turn(settings, user_prompt, full_content)
+                    except Exception as e:
+                        print(f"[Mood] 更新心境失败: {e}")
+                if settings.get('loveSettings', {}).get('enabled', False) and not request.is_sub_agent and not is_external_channel(request):
                     try:
                         from py.affection_system import extract_and_update_affection
                         # full_content 是当前轮次 AI 的完整回复文本
@@ -5865,7 +5928,7 @@ async def generate_stream_response(client, reasoner_client, request: ChatRequest
                             append_to_chat_buffer(buffer_key, "assistant", full_content)
                 except Exception as e:
                     print(f"[DiaryBuffer] 记录助手回复失败: {e}")
-                if m0 and not request.is_sub_agent:
+                if m0 and not request.is_sub_agent and not is_internal_diary_call(request):
                     print("记忆更新任务开始提交")
                     messages = f"用户说：{user_prompt}\n\n---\n\n你说：{full_content}"
                     infer = cur_memory.get('infer', False) or False
@@ -6341,7 +6404,7 @@ async def generate_complete_response(client,reasoner_client, request: ChatReques
             dynamic_user_context += f"\n\n[世界设定]\n{lore_content}"
 
         # 记忆检索（动态，基于当前用户输入）
-        if m0 and not request.is_sub_agent:
+        if m0 and not request.is_sub_agent and not is_internal_diary_call(request):
             memoryLimit = settings["memorySettings"]["memoryLimit"]
             try:
                 relevant_memories = await asyncio.to_thread(
@@ -6920,7 +6983,16 @@ async def generate_complete_response(client,reasoner_client, request: ChatReques
                 response_dict["choices"][0]['message']['reasoning_content'] = reasoning_content.group(1).strip()
                 # 移除原内容中的标签部分
                 response_dict["choices"][0]['message']['content'] = re.sub(fr'{open_tag}(.*?)\{close_tag}', '', content, flags=re.DOTALL).strip()
-        if m0:
+        # ========== 心境：把这一轮的事件投递给时钟（非流式路径同样要更新） ==========
+        if (settings.get('moodSettings', {}) or {}).get('enabled') \
+                and not request.is_sub_agent and not is_internal_diary_call(request):
+            try:
+                from py.mood_clock import mood_clock
+                await mood_clock.push_turn(settings, user_prompt,
+                                           response_dict["choices"][0]['message']['content'] or "")
+            except Exception as e:
+                print(f"[Mood] 更新心境失败: {e}")
+        if m0 and not is_internal_diary_call(request):
             messages=f"用户说：{user_prompt}\n\n---\n\n你说：{response_dict["choices"][0]['message']['content']}"
             executor = ThreadPoolExecutor()
             infer = cur_memory.get('infer') or False
@@ -7309,8 +7381,18 @@ async def chat_endpoint(request: ChatRequest, fastapi_request: Request):
         print('model:', request_settings['model'])
         
         # 将"system_prompt"插入到request.messages[0].content中 (注意这里使用的是 request_settings)
-        if request_settings['system_prompt']:
-            content_prepend(request.messages, 'system', request_settings['system_prompt'] + "\n\n")
+        # 去重：前端会把同一个 system_prompt 作为 messages[0] 一起发来，
+        # 这里再 prepend 会造成同一段人设被注入两次（重复占 token，且重复段权重更高）。
+        _sys_prompt_raw = request_settings.get('system_prompt') or ''
+        _sys_prompt_val = _sys_prompt_raw.strip()
+        if _sys_prompt_val:
+            _existing_system = ''
+            if request.messages and request.messages[0].get('role') == 'system':
+                _existing_system = request.messages[0].get('content') or ''
+            if _existing_system.lstrip().startswith(_sys_prompt_val):
+                pass  # messages[0] 已经是这段人设，无需重复注入
+            else:
+                content_prepend(request.messages, 'system', _sys_prompt_raw + "\n\n")
             
         # 【核心修正】因为之前我们没污染 current_settings，所以这里的比较才是真实的配置对比
         if current_settings != settings:
@@ -12974,6 +13056,9 @@ app.include_router(affection_router)
 
 from py.diary_api import router as diary_router
 app.include_router(diary_router)
+
+from py.mood_api import router as mood_router
+app.include_router(mood_router)
 
 mcp = FastApiMCP(
     app,
