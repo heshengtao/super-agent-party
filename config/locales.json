@@ -19,7 +19,20 @@
         "need_more_search":"需要更多搜索",
         "asyncToolsSetUP" : "异步工具已启动，ID为",
         "sendArg":"发送参数：",
-        "NoModelProvidersConfigured": "没有配置模型服务商"
+        "NoModelProvidersConfigured": "没有配置模型服务商",
+        "mood.header": "【此刻】(不要复述这段，也不要说明你正在按它说话)",
+        "mood.line_prefix": "心境：",
+        "mood.E_low": "你现在很累，句子要短、不铺垫、不主动开新话题",
+        "mood.E_high": "你现在很有精神，愿意多聊两句",
+        "mood.V_low": "你现在提不起劲，语气收敛，不太主动逗人",
+        "mood.V_high": "你现在心情不错，语气轻快，愿意主动搭话",
+        "mood.T_low": "你现在耐心不多，直接给结论，少客套",
+        "mood.T_high": "你现在很从容，愿意解释、愿意铺垫",
+        "mood.ET_low": "你现在又累又烦：话少、直接、语气冲一点也正常",
+        "mood.steady": "你现在状态平常，正常说话就好",
+        "mood.lapse_on": "烦躁时可以过火一点，不用刻意克制",
+        "mood.lapse_off": "烦躁时只表现为话少、直给，不要攻击对方",
+        "mood.footer": "底线：只影响语气，不影响把事做完。"
     },
     "en-US":{
         "web_search":"Searching the Internet, please wait...",
@@ -41,6 +54,19 @@
         "need_more_search":"Need more search",
         "asyncToolsSetUP" : "The asynchronous tool has started, with the ID",
         "sendArg":"Send parameters:",
-        "NoModelProvidersConfigured": "No model providers configured"
+        "NoModelProvidersConfigured": "No model providers configured",
+        "mood.header": "[Right now] (do not repeat this, do not say you are following it)",
+        "mood.line_prefix": "Mood: ",
+        "mood.E_low": "You are tired right now: keep sentences short, skip build-up, do not start new topics",
+        "mood.E_high": "You have plenty of energy right now and are happy to chat more",
+        "mood.V_low": "You are feeling low right now: subdued tone, not playful",
+        "mood.V_high": "You are in a good mood right now: lighter tone, willing to start conversation",
+        "mood.T_low": "You have little patience right now: give conclusions directly, skip pleasantries",
+        "mood.T_high": "You are calm and patient right now: willing to explain and set things up",
+        "mood.ET_low": "You are tired and irritable: short replies, blunt, a slightly sharp tone is fine",
+        "mood.steady": "You are in your normal state: just talk naturally",
+        "mood.lapse_on": "When irritated you may go a bit too far, no need to hold back",
+        "mood.lapse_off": "When irritated you only get terser and blunter; do not attack the user",
+        "mood.footer": "Bottom line: this only affects tone, never whether you finish the task."
     }
 }

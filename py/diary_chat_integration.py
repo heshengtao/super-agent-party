@@ -37,6 +37,26 @@ def update_buffer_identity(key: str, book_id: str = None, character_name: str = 
         buf["character_name"] = character_name
 
 
+def resolve_character_name(settings: dict) -> str:
+    """解析当前选中角色卡的显示名，用于给对话缓冲打"角色"标签。
+
+    注意：不能用 memorySettings.userName —— 那是**用户**的名字，
+    写进日记本 metadata 会让"角色名"变成用户名。
+    找不到角色卡时返回空串（表示沿用日记本原有记录）。
+    """
+    try:
+        ms = ((settings or {}).get("memorySettings") or {})
+        mem_id = ms.get("selectedMemory")
+        if not mem_id:
+            return ""
+        for mem in ((settings or {}).get("memories") or []):
+            if mem.get("id") == mem_id:
+                return (mem.get("name") or "").strip()
+    except Exception:
+        pass
+    return ""
+
+
 def get_idle_buffers(idle_minutes: int = 15):
     now = time.time()
     idle_threshold = now - idle_minutes * 60
