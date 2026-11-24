@@ -1235,3 +1235,138 @@ youcom_tool = {
         },
     },
 }
+
+
+async def specstream_search(query):
+    """Search the live web using the SpecStream Web Search API."""
+    settings = await load_settings()
+
+    proxy_url = settings.get('systemSettings', {}).get('proxy', '')
+    proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
+
+    def sync_search():
+        max_results = settings['webSearch'].get('specstream_max_results', 10)
+        api_key = settings['webSearch'].get('specstream_api_key', "")
+
+        if not api_key:
+            return "SpecStream API key 未配置，请在设置中填写 SPECSTREAM_API_KEY"
+
+        url = "https://api.specstream.ai/v1/web-search"
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+        }
+        payload = {
+            "q": query,
+            "num": max_results,
+            "passages": True,
+        }
+
+        try:
+            response = requests.post(url, headers=headers, json=payload, proxies=proxies, timeout=30)
+            if response.status_code == 200:
+                result_data = response.json()
+                formatted_results = []
+                for item in result_data.get('sources') or []:
+                    formatted_results.append({
+                        'title': item.get('title', '无标题'),
+                        'link': item.get('url', ''),
+                        'displayUrl': item.get('url', ''),
+                        'snippet': item.get('excerpt') or item.get('snippet') or '无内容摘要',
+                        'siteName': item.get('source') or item.get('title', '未知来源'),
+                    })
+                return json.dumps(formatted_results, indent=2, ensure_ascii=False)
+            elif response.status_code in (401, 403):
+                return f"SpecStream API key无效或缺少权限，状态码：{response.status_code}"
+            else:
+                return f"请求失败，状态码：{response.status_code}，响应内容：{response.text}"
+        except Exception as e:
+            print(f"SpecStream搜索错误: {str(e)}")
+            return ""
+
+    try:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, sync_search)
+    except Exception as e:
+        print(f"异步执行错误: {e}")
+        return ""
+
+
+specstream_tool = {
+    "type": "function",
+    "function": {
+        "name": "specstream_search",
+        "description": "通过 SpecStream Web Search API 获取实时网页搜索结果，返回标题、来源链接与正文摘录。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "需要搜索的关键词或自然语言查询语句。",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+}
+
+
+async def specstream_extract(original_url: str) -> str:
+    """Extract clean readable page text from a URL via SpecStream Extract API."""
+    settings = await load_settings()
+    proxy_url = settings.get('systemSettings', {}).get('proxy', '')
+    proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
+
+    def sync_extract():
+        api_key = settings['webSearch'].get('specstream_api_key', "")
+        if not api_key:
+            return "SpecStream API key 未配置，请在设置中填写 SPECSTREAM_API_KEY"
+        try:
+            response = requests.post(
+                "https://api.specstream.ai/v1/extract",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={"urls": [original_url]},
+                proxies=proxies,
+                timeout=30,
+            )
+            if response.status_code != 200:
+                return f"SpecStream页面提取失败，状态码：{response.status_code}"
+            results = (response.json().get("results") or [])
+            if not results:
+                return "SpecStream页面提取失败：未返回内容"
+            first = results[0]
+            if not first.get("ok", True):
+                return f"SpecStream页面提取失败：{first.get('error', '未知错误')}"
+            title = first.get("title") or "未命名页面"
+            text = first.get("markdown") or first.get("text") or ""
+            return f"# {title}\n\n{text}" if text else "SpecStream页面提取失败：页面无正文"
+        except Exception as e:
+            return f"SpecStream页面提取异常：{str(e)}"
+
+    try:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, sync_extract)
+    except Exception as e:
+        return f"异步执行错误: {e}"
+
+
+specstream_extract_tool = {
+    "type": "function",
+    "function": {
+        "name": "specstream_extract",
+        "description": "通过 SpecStream Extract API 从指定网页 URL 提取干净的标题与正文内容。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "original_url": {
+                    "type": "string",
+                    "description": "要提取正文内容的网页 URL。",
+                },
+            },
+            "required": ["original_url"],
+        },
+    },
+}
